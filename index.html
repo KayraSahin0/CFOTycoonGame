@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="tr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CFO Tycoon | Muhasebe Simülasyonu</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        slate: {
+                            850: '#1e293b', 
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-dark@5/dark.css" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="h-screen overflow-hidden flex flex-col bg-slate-900 text-slate-200">
+
+    <header class="bg-slate-950 border-b border-slate-800 p-3 shadow-lg z-10">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <img src="./logopic/CFOTycoonLogo.png" alt="CFO Tycoon Logo" class="h-10 w-auto object-contain">
+                
+                <h1 class="text-xl font-bold tracking-tight text-emerald-400 hidden md:block">CFO Tycoon</h1>
+                <span id="titleBadge" class="bg-blue-900 text-blue-200 text-xs px-2 py-1 rounded-full ml-2 border border-blue-700">Startup</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <button onclick="openHowToPlay()" class="text-sm text-slate-400 hover:text-white transition flex items-center bg-slate-800 hover:bg-slate-700 px-3 py-1 rounded border border-slate-700">
+                    <i class="fa-solid fa-circle-question mr-2"></i> Nasıl Oynanır?
+                </button>
+                <div class="bg-slate-800 border border-slate-700 px-3 py-1 rounded text-sm text-yellow-400 font-bold flex items-center" title="Puan">
+                    <i class="fa-solid fa-star mr-2"></i> <span id="scoreBadge">0</span>
+                </div>
+                <div class="bg-slate-800 border border-slate-700 px-3 py-1 rounded text-sm flex items-center">
+                    <i class="fa-regular fa-calendar text-slate-400 mr-2"></i>
+                    <span id="turnBadge">Ay: 1</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 grid grid-cols-12 gap-0 overflow-hidden bg-slate-900">
+        
+        <section class="col-span-12 md:col-span-3 bg-slate-850 border-r border-slate-800 flex flex-col h-full shadow-xl z-10">
+            <div class="p-4 bg-slate-900/50 border-b border-slate-800 relative">
+                <h2 class="text-xs font-bold text-slate-500 uppercase mb-2 tracking-wider">Güncel Senaryo</h2>
+                <div id="scenarioText" class="text-sm font-medium text-slate-300 bg-slate-800 p-4 rounded-lg border border-slate-700 shadow-sm min-h-[80px]">
+                    Senaryo yükleniyor...
+                </div>
+                <button onclick="useHelp()" class="absolute top-4 right-4 text-xs text-blue-400 hover:text-blue-300 transition flex items-center" title="Cevabı göster (Puan kazandırmaz)">
+                    <i class="fa-solid fa-life-ring mr-1"></i> Yardım Al
+                </button>
+            </div>
+
+            <div class="p-4 flex-1 overflow-y-auto">
+                <h2 class="text-xs font-bold text-slate-500 uppercase mb-3 tracking-wider">Fiş Girişi</h2>
+                
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-xs text-slate-500 mb-1">Hesap Seçimi</label>
+                        <select id="accountSelect" class="w-full text-sm bg-slate-800 border border-slate-700 text-slate-200 rounded-md p-2 focus:ring-2 focus:ring-blue-600 focus:border-blue-600 outline-none transition">
+                            <option value="">Hesap Seçin...</option>
+                            </select>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-xs text-slate-500 mb-1">Yön</label>
+                            <select id="entryType" class="w-full text-sm bg-slate-800 border border-slate-700 text-slate-200 rounded-md p-2 outline-none transition">
+                                <option value="debit">Borç (Dr)</option>
+                                <option value="credit">Alacak (Cr)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-500 mb-1">Tutar</label>
+                            <input type="number" id="amountInput" class="w-full text-sm bg-slate-800 border border-slate-700 text-slate-200 rounded-md p-2 outline-none transition placeholder-slate-600" placeholder="0.00">
+                        </div>
+                    </div>
+
+                    <button onclick="addToJournal()" class="w-full bg-slate-700 hover:bg-slate-600 text-slate-200 text-sm py-2.5 rounded-md transition shadow-sm border border-slate-600 font-medium flex items-center justify-center">
+                        <i class="fa-solid fa-plus mr-2"></i> Satır Ekle
+                    </button>
+                </div>
+
+                <div class="mt-6 rounded-lg border border-slate-700 overflow-hidden">
+                    <h3 class="text-xs font-bold text-slate-500 uppercase p-2 bg-slate-900 border-b border-slate-700 flex justify-between items-center">
+                        <span>Fiş Önizleme</span>
+                        <span id="balanceIndicator" class="text-xs"></span>
+                    </h3>
+                    <div class="overflow-x-auto bg-slate-800">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="text-xs text-slate-500 border-b border-slate-700">
+                                    <th class="p-2 pl-3">Kod</th>
+                                    <th class="p-2">Hesap</th>
+                                    <th class="p-2 text-right">Borç</th>
+                                    <th class="p-2 text-right">Alacak</th>
+                                    <th class="p-2"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="journalTableBody" class="divide-y divide-slate-700">
+                                </tbody>
+                            <tfoot class="border-t border-slate-700 font-bold text-xs bg-slate-900/50 text-slate-400">
+                                <tr>
+                                    <td colspan="2" class="p-2 text-right">Toplam:</td>
+                                    <td class="p-2 text-right text-slate-300" id="totalDr">0.00</td>
+                                    <td class="p-2 text-right text-slate-300" id="totalCr">0.00</td>
+                                    <td></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4 border-t border-slate-800 bg-slate-900/50">
+                <button id="saveButton" onclick="saveTransaction()" disabled class="w-full bg-emerald-700 hover:bg-emerald-600 disabled:bg-slate-700 disabled:text-slate-500 disabled:border-slate-800 disabled:cursor-not-allowed text-white font-bold py-3 rounded-md shadow-lg transition border border-emerald-600 flex items-center justify-center relative overflow-hidden group">
+                    <span class="relative z-10 flex items-center">
+                         <i class="fa-solid fa-floppy-disk mr-2"></i> KONTROL ET & KAYDET
+                    </span>
+                </button>
+                
+                <div class="grid grid-cols-2 gap-2 mt-3">
+                    <button id="validateReportsBtn" onclick="validateHardMode()" class="hidden w-full bg-amber-600 hover:bg-amber-500 text-white text-sm py-2.5 rounded-md shadow transition border border-amber-500 flex items-center justify-center">
+                        <i class="fa-solid fa-calculator mr-2"></i> Raporları Doğrula
+                    </button>
+                    <button id="nextTurnBtn" onclick="nextTurn()" class="hidden w-full col-span-2 bg-blue-700 hover:bg-blue-600 text-white text-sm py-2.5 rounded-md shadow transition border border-blue-600 flex items-center justify-center">
+                        Sonraki Ay <i class="fa-solid fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section class="col-span-12 md:col-span-5 bg-slate-900 p-4 h-full overflow-y-auto custom-scrollbar">
+            <h2 class="text-lg font-bold text-slate-200 mb-4 flex items-center sticky top-0 bg-slate-900 py-2 z-10">
+                <span class="bg-slate-800 p-2 rounded-lg mr-3 border border-slate-700">
+                    <i class="fa-solid fa-book-open text-blue-400"></i>
+                </span>
+                Büyük Defter (T-Cetvelleri)
+            </h2>
+            
+            <div id="ledgerContainer" class="masonry-container pb-6">
+                <div class="text-center w-full text-slate-500 mt-20 flex flex-col items-center">
+                    <i class="fa-solid fa-spinner fa-spin text-3xl mb-3 text-blue-500"></i>
+                    <span>Veriler bekleniyor...</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="col-span-12 md:col-span-4 bg-slate-850 border-l border-slate-800 h-full overflow-y-auto shadow-xl z-10 flex flex-col custom-scrollbar">
+            <div class="p-4 border-b border-slate-800 sticky top-0 bg-slate-850 z-20">
+                <h2 class="text-lg font-bold text-slate-200 flex items-center">
+                    <span class="bg-slate-800 p-2 rounded-lg mr-3 border border-slate-700">
+                         <i class="fa-solid fa-file-invoice-dollar text-emerald-400"></i>
+                    </span>
+                    Mali Tablolar
+                </h2>
+            </div>
+
+            <div class="p-4 space-y-8 flex-1">
+                <div class="bg-slate-800 rounded-xl border border-slate-700 p-5 shadow-lg relative mt-4">
+                    <div class="absolute -top-3 left-4 bg-blue-700 text-blue-100 text-xs px-3 py-1 rounded-full uppercase font-bold tracking-wider border border-blue-600 shadow-sm">Bilanço</div>
+                    <div id="balanceSheetContent" class="mt-3 space-y-1">
+                        <div class="text-sm text-slate-500 italic">Veri bekleniyor...</div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-800 rounded-xl border border-slate-700 p-5 shadow-lg relative mt-6">
+                    <div class="absolute -top-3 left-4 bg-emerald-700 text-emerald-100 text-xs px-3 py-1 rounded-full uppercase font-bold tracking-wider border border-emerald-600 shadow-sm">Gelir Tablosu</div>
+                    <div id="incomeStatementContent" class="mt-3 space-y-1">
+                        <div class="text-sm text-slate-500 italic">Veri bekleniyor...</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <div id="howToPlayModal" class="fixed inset-0 bg-slate-900/80 z-50 hidden flex items-center justify-center backdrop-blur-sm">
+        <div class="bg-slate-800 w-full max-w-2xl rounded-xl border border-slate-700 shadow-2xl overflow-hidden animate__animated animate__zoomIn">
+            <div class="p-4 bg-slate-900 border-b border-slate-700 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-white"><i class="fa-solid fa-circle-question mr-2 text-emerald-400"></i>Nasıl Oynanır?</h3>
+                <button onclick="closeHowToPlay()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div class="p-6 text-slate-300 text-sm space-y-4 max-h-[70vh] overflow-y-auto custom-scrollbar">
+                <p>CFO Tycoon'da amaç, şirketin karşılaşacağı finansal senaryoları doğru muhasebe kayıtlarıyla yönetmektir.</p>
+                
+                <h4 class="text-emerald-400 font-bold border-b border-slate-700 pb-1">1. Mantık (Çift Taraflı Kayıt)</h4>
+                <p>Her işlemde en az bir hesap <b>Borç (Debit)</b>, en az bir hesap <b>Alacak (Credit)</b> tarafına yazılır. Toplamlar eşit olmalıdır.</p>
+                <ul class="list-disc pl-5 space-y-1 text-slate-400">
+                    <li><b>Varlık Hesapları (100-299):</b> Artışlar BORÇ, Azalışlar ALACAK.</li>
+                    <li><b>Kaynak Hesapları (300-599):</b> Artışlar ALACAK, Azalışlar BORÇ.</li>
+                    <li><b>Gider Hesapları (700-799):</b> Genelde BORÇ çalışır.</li>
+                    <li><b>Gelir Hesapları (600-699):</b> Genelde ALACAK çalışır.</li>
+                </ul>
+
+                <h4 class="text-blue-400 font-bold border-b border-slate-700 pb-1 mt-4">2. Oyun Akışı</h4>
+                <p>Sol üstteki <b>Senaryo</b> kartını okuyun. Örneğin: "Mal satıldı, para kasaya girdi."</p>
+                <ol class="list-decimal pl-5 space-y-1 text-slate-400">
+                    <li>İlgili hesabı listeden seçin (Örn: 100 Kasa).</li>
+                    <li>Yönünü seçin (Borç/Alacak) ve tutarı girip "Ekle" deyin.</li>
+                    <li>Tüm kalemleri girdikten sonra <b>"KONTROL ET & KAYDET"</b> butonuna basın.</li>
+                </ol>
+
+                <h4 class="text-yellow-400 font-bold border-b border-slate-700 pb-1 mt-4">3. İpuçları</h4>
+                <p class="text-slate-400">Takıldığınızda sağ üstteki <b>"Yardım Al"</b> butonunu kullanabilirsiniz. Bu, doğru cevabı gösterir ancak o turdan puan kazanamazsınız.</p>
+            </div>
+            <div class="p-4 bg-slate-900 border-t border-slate-700 text-right">
+                <button onclick="closeHowToPlay()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-bold transition">Anlaşıldı</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

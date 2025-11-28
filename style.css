@@ -1,0 +1,205 @@
+/* Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap');
+
+body {
+    font-family: 'Inter', sans-serif;
+}
+
+/* Sayısal değerler için Monospace font */
+.font-mono {
+    font-family: 'JetBrains Mono', monospace;
+}
+
+/* Custom Scrollbar (Dark Theme) */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+::-webkit-scrollbar-track {
+    background: #0f172a; /* slate-900 */
+    border-left: 1px solid #1e293b; /* slate-800 */
+}
+::-webkit-scrollbar-thumb {
+    background: #334155; /* slate-700 */
+    border-radius: 5px;
+    border: 2px solid #0f172a; /* slate-900 */
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #475569; /* slate-600 */
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+/* T-Cetveli (Ledger) Görünümü - Dark Mode */
+.t-account-card {
+    background-color: #1e293b; /* slate-800 */
+    border: 1px solid #334155; /* slate-700 */
+    border-radius: 0.75rem; /* rounded-xl */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.24);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.t-account-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+    border-color: #475569; /* slate-600 */
+}
+
+.t-account {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    padding: 0.5rem;
+}
+
+.t-header {
+    text-align: center;
+    font-weight: bold;
+    font-size: 0.9rem;
+    color: #94a3b8; /* slate-400 */
+    border-bottom: 2px solid #475569; /* slate-600 */
+    padding-bottom: 6px;
+    margin-bottom: 8px;
+    letter-spacing: 0.025em;
+}
+
+.t-body {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    min-height: 40px;
+}
+
+/* T'nin dikey çizgisi */
+.t-body::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-color: #475569; /* slate-600 */
+    transform: translateX(-50%);
+}
+
+.t-debit, .t-credit {
+    width: 50%;
+    padding: 2px 8px;
+    font-size: 0.85rem;
+    font-family: 'JetBrains Mono', monospace;
+    color: #cbd5e1; /* slate-300 */
+}
+
+.t-debit { text-align: right; padding-right: 12px; }
+.t-credit { text-align: left; padding-left: 12px; }
+
+.t-footer {
+    margin-top: 8px;
+    padding-top: 6px;
+    border-top: 1px solid #334155; /* slate-700 */
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    font-weight: bold;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+/* Hard Mode Inputları - Dark Mode */
+.hard-mode-input {
+    width: 120px;
+    background-color: #334155; /* Slate-700 */
+    border: 2px solid #475569; /* Slate-600 */
+    color: #f1f5f9; /* Slate-100 */
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-family: 'JetBrains Mono', monospace;
+    text-align: right;
+    transition: all 0.3s ease;
+}
+
+.hard-mode-input::placeholder {
+    color: #64748b;
+}
+
+.hard-mode-input:focus {
+    outline: none;
+    border-color: #eab308; /* Amber-500 */
+    background-color: #451a03; /* Dark amber tint */
+    box-shadow: 0 0 0 2px rgba(234, 179, 8, 0.3);
+}
+.hard-mode-input:disabled {
+    opacity: 0.8;
+    cursor: not-allowed;
+}
+
+.hard-mode-input.error {
+    background-color: #450a0a; /* Dark red tint */
+    border-color: #ef4444; /* Red-500 */
+    color: #fca5a5;
+    animation: shake 0.5s;
+}
+
+.hard-mode-input.success {
+    background-color: #052e16; /* Dark green tint */
+    border-color: #22c55e; /* Green-500 */
+    color: #86efac;
+}
+
+/* Fiş Satırı Animasyonu ve Stil */
+.entry-row {
+    animation: fadeInDown 0.2s ease-out;
+    transition: background-color 0.2s;
+}
+.entry-row:hover {
+    background-color: #1e293b !important; /* slate-800 */
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+/* Masonry Layout hack for T-Charts using Flex wrap */
+.masonry-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem; /* gap-5 */
+    align-items: flex-start;
+}
+.masonry-item {
+    flex: 1 1 280px; /* Min width adjusted */
+    max-width: 400px;
+}
+
+/* Rapor Satırları Dark Mode */
+.report-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #334155; /* slate-700 */
+}
+.report-row:last-child {
+    border-bottom: none;
+}
+.report-label {
+    font-size: 0.9rem;
+    color: #94a3b8; /* slate-400 */
+}
+.report-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+}
+.report-total {
+    background-color: #1e293b; /* slate-800 */
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    margin-top: 0.5rem;
+    display: flex;
+    justify-content: space-between;
+    font-weight: bold;
+    font-size: 0.9rem;
+    color: #e2e8f0; /* slate-200 */
+    border: 1px solid #334155;
+}
