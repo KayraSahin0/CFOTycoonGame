@@ -13,6 +13,7 @@ const GameState = {
     title: 'Startup',
     multiplier: 1,
     accounts: [], 
+    achievements: [], // YENİ
     currentScenario: null,
     journalEntry: [],
     helpUsed: false
@@ -91,6 +92,7 @@ function startGame(mode, difficulty) {
     GameState.mode = mode;
     GameState.difficulty = difficulty;
     GameState.accounts = JSON.parse(JSON.stringify(INITIAL_ACCOUNTS)); // Deep copy
+    GameState.achievements = JSON.parse(JSON.stringify(ACHIEVEMENTS)); // YENİ
     GameState.turn = 1;
     GameState.score = 0;
     GameState.journalEntry = [];
@@ -139,7 +141,6 @@ function generateNewTurn() {
         else { GameState.title = "Startup"; GameState.multiplier = 1; }
     }
 
-    // Title parametresini gönderiyoruz
     GameState.currentScenario = ScenarioEngine.generate(GameState.turn, GameState.multiplier, GameState.title);
     
     // UI Güncelle
@@ -261,18 +262,80 @@ function removeEntry(index) {
     renderJournalTable();
 }
 
-// --- MODAL FUNCTIONS (NASIL OYNANIR) ---
+// --- MODAL FUNCTIONS (NASIL OYNANIR & BAŞARIMLAR) ---
 function openHowToPlay() {
     const modal = document.getElementById('howToPlayModal');
     modal.classList.remove('hidden');
-    // Animasyonu tetikle
-    const content = modal.querySelector('div');
-    content.classList.add('animate__zoomIn');
+    modal.querySelector('div').classList.add('animate__zoomIn');
 }
 
 function closeHowToPlay() {
     const modal = document.getElementById('howToPlayModal');
     modal.classList.add('hidden');
+}
+
+function openAchievements() {
+    const modal = document.getElementById('achievementsModal');
+    const list = document.getElementById('achievementsList');
+    list.innerHTML = '';
+
+    GameState.achievements.forEach(ach => {
+        const item = document.createElement('div');
+        item.className = `p-3 mb-2 rounded border flex items-center ${ach.unlocked ? 'bg-slate-800 border-yellow-600' : 'bg-slate-900 border-slate-700 opacity-60'}`;
+        
+        item.innerHTML = `
+            <div class="text-2xl mr-4 ${ach.unlocked ? 'text-yellow-500' : 'text-slate-600'}">
+                <i class="fa-solid ${ach.icon}"></i>
+            </div>
+            <div>
+                <h4 class="font-bold ${ach.unlocked ? 'text-white' : 'text-slate-500'}">${ach.title}</h4>
+                <p class="text-xs text-slate-400">${ach.desc}</p>
+            </div>
+            ${ach.unlocked ? '<div class="ml-auto text-yellow-500"><i class="fa-solid fa-check"></i></div>' : ''}
+        `;
+        list.appendChild(item);
+    });
+
+    modal.classList.remove('hidden');
+    modal.querySelector('div').classList.add('animate__zoomIn');
+}
+
+function closeAchievements() {
+    document.getElementById('achievementsModal').classList.add('hidden');
+}
+
+// --- BAŞARIM SİSTEMİ MANTIĞI ---
+function checkAchievements() {
+    const netIncome = calculateNetIncome();
+    
+    const unlock = (id) => {
+        const ach = GameState.achievements.find(a => a.id === id);
+        if (ach && !ach.unlocked) {
+            ach.unlocked = true;
+            // Toast Notification
+            Swal.fire({
+                toast: true,
+                position: 'bottom-end',
+                icon: 'success',
+                title: 'Başarım Kazanıldı!',
+                text: ach.title,
+                showConfirmButton: false,
+                timer: 3000,
+                background: '#1e293b',
+                color: '#fff'
+            });
+        }
+    };
+
+    // Kar Kontrolleri (Sadece bu tur için)
+    if (netIncome > 0) unlock('first_profit');
+    if (netIncome > 10000) unlock('profit_10k');
+    if (netIncome > 100000) unlock('profit_100k');
+
+    // Unvan Kontrolleri
+    if (GameState.title === 'KOBİ' || GameState.title === 'A.Ş.' || GameState.title === 'Holding') unlock('title_kobi');
+    if (GameState.title === 'A.Ş.' || GameState.title === 'Holding') unlock('title_corp');
+    if (GameState.title === 'Holding') unlock('title_holding');
 }
 
 
@@ -327,15 +390,25 @@ function saveTransaction() {
         }
     });
 
-    // 4. İflas Kontrolü
+    // 4. BAŞARIM KONTROLÜ (İflastan önce)
+    checkAchievements();
+
+    // 5. İflas Kontrolü
     const cash = GameState.accounts.find(a => a.code === '100').balance;
     const banks = GameState.accounts.find(a => a.code === '102').balance;
     if (cash + banks < -50000 && GameState.mode === 'career') {
+        // İflas başarımını tetikle
+        const ach = GameState.achievements.find(a => a.id === 'bankruptcy');
+        if(ach && !ach.unlocked) { 
+             ach.unlocked = true; 
+             // Toast gösterilmesine gerek yok, oyun bitiyor
+        }
+
         Swal.fire('İFLAS!', 'Nakit akışını yönetemediniz. Şirket battı.', 'error').then(() => location.reload());
         return;
     }
 
-    // 5. UI Güncelleme
+    // 6. UI Güncelleme
     updateUI();
 
     if (GameState.difficulty === 'hard') {
@@ -559,3 +632,5 @@ window.nextTurn = nextTurn;
 window.useHelp = useHelp;
 window.openHowToPlay = openHowToPlay;
 window.closeHowToPlay = closeHowToPlay;
+window.openAchievements = openAchievements;
+window.closeAchievements = closeAchievements;

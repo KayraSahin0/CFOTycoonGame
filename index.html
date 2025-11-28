@@ -44,14 +44,20 @@
                 
                 <span id="titleBadge" class="bg-blue-900 text-blue-200 text-xs px-2 py-1 rounded-full ml-2 border border-blue-700">Startup</span>
             </div>
-            <div class="flex items-center gap-4">
-                <button onclick="openHowToPlay()" class="text-sm text-slate-400 hover:text-white transition flex items-center bg-slate-800 hover:bg-slate-700 px-3 py-1 rounded border border-slate-700">
-                    <i class="fa-solid fa-circle-question mr-2"></i> Nasıl Oynanır?
+            <div class="flex items-center gap-3">
+                <button onclick="openAchievements()" class="bg-slate-800 hover:bg-slate-700 text-yellow-500 px-3 py-1.5 rounded border border-slate-700 transition" title="Başarımlar">
+                    <i class="fa-solid fa-trophy"></i>
                 </button>
-                <div class="bg-slate-800 border border-slate-700 px-3 py-1 rounded text-sm text-yellow-400 font-bold flex items-center" title="Puan">
+
+                <button onclick="openHowToPlay()" class="text-sm text-slate-400 hover:text-white transition flex items-center bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded border border-slate-700">
+                    <i class="fa-solid fa-circle-question mr-2"></i> <span class="hidden sm:inline">Nasıl Oynanır?</span>
+                </button>
+                
+                <div class="bg-slate-800 border border-slate-700 px-3 py-1.5 rounded text-sm text-yellow-400 font-bold flex items-center" title="Puan">
                     <i class="fa-solid fa-star mr-2"></i> <span id="scoreBadge">0</span>
                 </div>
-                <div class="bg-slate-800 border border-slate-700 px-3 py-1 rounded text-sm flex items-center">
+                
+                <div class="bg-slate-800 border border-slate-700 px-3 py-1.5 rounded text-sm flex items-center">
                     <i class="fa-regular fa-calendar text-slate-400 mr-2"></i>
                     <span id="turnBadge">Ay: 1</span>
                 </div>
@@ -247,6 +253,20 @@
             </div>
             <div class="p-4 bg-slate-900 border-t border-slate-700 text-right">
                 <button onclick="closeHowToPlay()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-bold transition">Anlaşıldı</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="achievementsModal" class="fixed inset-0 bg-slate-900/80 z-50 hidden flex items-center justify-center backdrop-blur-sm">
+        <div class="bg-slate-800 w-full max-w-xl rounded-xl border border-slate-700 shadow-2xl overflow-hidden animate__animated animate__zoomIn">
+            <div class="p-4 bg-slate-900 border-b border-slate-700 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-white"><i class="fa-solid fa-trophy mr-2 text-yellow-500"></i>Başarımlar</h3>
+                <button onclick="closeAchievements()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div class="p-4 max-h-[70vh] overflow-y-auto custom-scrollbar bg-slate-850" id="achievementsList">
+                </div>
+            <div class="p-4 bg-slate-900 border-t border-slate-700 text-right">
+                <button onclick="closeAchievements()" class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded font-bold transition">Kapat</button>
             </div>
         </div>
     </div>

@@ -3,6 +3,17 @@
  * Kaynak: Tek Düzen Hesap Planı
  */
 
+// Başarımlar Listesi
+const ACHIEVEMENTS = [
+    { id: 'first_profit', title: 'İlk Kar', desc: 'Dönem net karı pozitif olan bir ayı tamamla.', icon: 'fa-seedling', unlocked: false },
+    { id: 'profit_10k', title: 'Küçük Adımlar', desc: 'Bir ayda 10.000 TL üzeri net kar et.', icon: 'fa-coins', unlocked: false },
+    { id: 'profit_100k', title: 'Para Basıyor', desc: 'Bir ayda 100.000 TL üzeri net kar et.', icon: 'fa-money-bill-wave', unlocked: false },
+    { id: 'title_kobi', title: 'KOBİ Olduk!', desc: 'Şirketi KOBİ seviyesine yükselt (50k+ Özkaynak).', icon: 'fa-building', unlocked: false },
+    { id: 'title_corp', title: 'Kurumsallaşma', desc: 'Şirketi A.Ş. seviyesine yükselt (250k+ Özkaynak).', icon: 'fa-city', unlocked: false },
+    { id: 'title_holding', title: 'Zirve', desc: 'Şirketi Holding seviyesine yükselt (1M+ Özkaynak).', icon: 'fa-globe', unlocked: false },
+    { id: 'bankruptcy', title: 'Dibe Vuruş', desc: 'Şirketi iflas ettir.', icon: 'fa-skull', unlocked: false }
+];
+
 // Hesap Planı (Chart of Accounts)
 const INITIAL_ACCOUNTS = [
     // --- 1. DÖNEN VARLIKLAR ---
