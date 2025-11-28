@@ -37,7 +37,11 @@
             <div class="flex items-center gap-3">
                 <img src="./logopic/CFOTycoonLogo.png" alt="CFO Tycoon Logo" class="h-10 w-auto object-contain">
                 
-                <h1 class="text-xl font-bold tracking-tight text-emerald-400 hidden md:block">CFO Tycoon</h1>
+                <div class="hidden md:block">
+                    <h1 class="text-xl font-bold tracking-tight text-emerald-400 leading-none">CFO Tycoon</h1>
+                    <span id="companyNameDisplay" class="text-xs text-slate-500 font-mono"></span>
+                </div>
+                
                 <span id="titleBadge" class="bg-blue-900 text-blue-200 text-xs px-2 py-1 rounded-full ml-2 border border-blue-700">Startup</span>
             </div>
             <div class="flex items-center gap-4">
@@ -193,33 +197,53 @@
     </main>
 
     <div id="howToPlayModal" class="fixed inset-0 bg-slate-900/80 z-50 hidden flex items-center justify-center backdrop-blur-sm">
-        <div class="bg-slate-800 w-full max-w-2xl rounded-xl border border-slate-700 shadow-2xl overflow-hidden animate__animated animate__zoomIn">
+        <div class="bg-slate-800 w-full max-w-3xl rounded-xl border border-slate-700 shadow-2xl overflow-hidden animate__animated animate__zoomIn">
             <div class="p-4 bg-slate-900 border-b border-slate-700 flex justify-between items-center">
                 <h3 class="text-lg font-bold text-white"><i class="fa-solid fa-circle-question mr-2 text-emerald-400"></i>Nasıl Oynanır?</h3>
                 <button onclick="closeHowToPlay()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
             <div class="p-6 text-slate-300 text-sm space-y-4 max-h-[70vh] overflow-y-auto custom-scrollbar">
-                <p>CFO Tycoon'da amaç, şirketin karşılaşacağı finansal senaryoları doğru muhasebe kayıtlarıyla yönetmektir.</p>
                 
-                <h4 class="text-emerald-400 font-bold border-b border-slate-700 pb-1">1. Mantık (Çift Taraflı Kayıt)</h4>
-                <p>Her işlemde en az bir hesap <b>Borç (Debit)</b>, en az bir hesap <b>Alacak (Credit)</b> tarafına yazılır. Toplamlar eşit olmalıdır.</p>
-                <ul class="list-disc pl-5 space-y-1 text-slate-400">
-                    <li><b>Varlık Hesapları (100-299):</b> Artışlar BORÇ, Azalışlar ALACAK.</li>
-                    <li><b>Kaynak Hesapları (300-599):</b> Artışlar ALACAK, Azalışlar BORÇ.</li>
-                    <li><b>Gider Hesapları (700-799):</b> Genelde BORÇ çalışır.</li>
-                    <li><b>Gelir Hesapları (600-699):</b> Genelde ALACAK çalışır.</li>
-                </ul>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <h4 class="text-emerald-400 font-bold border-b border-slate-700 pb-1 mb-2">1. Temel Mantık</h4>
+                        <p class="mb-2">Muhasebede her işlem çift taraflıdır. Toplam <b>BORÇ</b> ve toplam <b>ALACAK</b> birbirine eşit olmalıdır.</p>
+                        <ul class="list-disc pl-5 space-y-1 text-slate-400 text-xs">
+                            <li><b class="text-blue-300">Varlıklar (100-299):</b> Artışlar BORÇ, Azalışlar ALACAK.</li>
+                            <li><b class="text-purple-300">Kaynaklar (300-599):</b> Artışlar ALACAK, Azalışlar BORÇ.</li>
+                            <li><b class="text-red-300">Giderler (700+):</b> Genelde BORÇ çalışır.</li>
+                            <li><b class="text-green-300">Gelirler (600+):</b> Genelde ALACAK çalışır.</li>
+                        </ul>
+                    </div>
 
-                <h4 class="text-blue-400 font-bold border-b border-slate-700 pb-1 mt-4">2. Oyun Akışı</h4>
-                <p>Sol üstteki <b>Senaryo</b> kartını okuyun. Örneğin: "Mal satıldı, para kasaya girdi."</p>
+                    <div>
+                        <h4 class="text-yellow-400 font-bold border-b border-slate-700 pb-1 mb-2">2. Kariyer Basamakları</h4>
+                        <p class="mb-2">Kariyer modunda <b>Özkaynaklarınız</b> (Sermaye + Kar) arttıkça unvanınız ve kazandığınız puan katsayısı artar.</p>
+                        <table class="w-full text-xs text-left text-slate-400">
+                            <thead class="text-slate-200 bg-slate-700">
+                                <tr>
+                                    <th class="p-1">Unvan</th>
+                                    <th class="p-1">Gereken Özkaynak</th>
+                                    <th class="p-1 text-right">Çarpan</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-700 border border-slate-700">
+                                <tr><td class="p-1">Startup</td><td class="p-1">0 - 50k</td><td class="p-1 text-right">x1</td></tr>
+                                <tr><td class="p-1">KOBİ</td><td class="p-1">50k+</td><td class="p-1 text-right">x2</td></tr>
+                                <tr><td class="p-1">A.Ş.</td><td class="p-1">250k+</td><td class="p-1 text-right">x5</td></tr>
+                                <tr><td class="p-1 text-amber-400 font-bold">Holding</td><td class="p-1 text-amber-400">1M+</td><td class="p-1 text-right text-amber-400">x10</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <h4 class="text-blue-400 font-bold border-b border-slate-700 pb-1 mt-4">3. Oyun Akışı</h4>
                 <ol class="list-decimal pl-5 space-y-1 text-slate-400">
-                    <li>İlgili hesabı listeden seçin (Örn: 100 Kasa).</li>
-                    <li>Yönünü seçin (Borç/Alacak) ve tutarı girip "Ekle" deyin.</li>
+                    <li>Sol üstteki <b>Senaryo</b> kartını dikkatlice okuyun.</li>
+                    <li>İlgili hesabı, yönü (Borç/Alacak) ve tutarı girerek <b>"Ekle"</b> butonuna basın.</li>
                     <li>Tüm kalemleri girdikten sonra <b>"KONTROL ET & KAYDET"</b> butonuna basın.</li>
+                    <li>Takıldığınızda sağ üstteki <b>"Yardım Al"</b> butonunu kullanabilirsiniz (Puan kazandırmaz).</li>
                 </ol>
-
-                <h4 class="text-yellow-400 font-bold border-b border-slate-700 pb-1 mt-4">3. İpuçları</h4>
-                <p class="text-slate-400">Takıldığınızda sağ üstteki <b>"Yardım Al"</b> butonunu kullanabilirsiniz. Bu, doğru cevabı gösterir ancak o turdan puan kazanamazsınız.</p>
             </div>
             <div class="p-4 bg-slate-900 border-t border-slate-700 text-right">
                 <button onclick="closeHowToPlay()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-bold transition">Anlaşıldı</button>

@@ -1,68 +1,68 @@
 /**
  * CFO Tycoon - Veri Yapıları ve Senaryo Motoru
- * Kaynak: Tek Düzen Hesap Planı 
+ * Kaynak: Tek Düzen Hesap Planı
  */
 
 // Hesap Planı (Chart of Accounts)
-// Type: 'A' (Asset/Varlık), 'L' (Liability/Kaynak), 'E' (Equity/Özkaynak), 'I' (Income/Gelir), 'X' (Expense/Gider)
-// Group: Raporlama için gruplama anahtarı
 const INITIAL_ACCOUNTS = [
-    // --- 1. DÖNEN VARLIKLAR [cite: 1] ---
-    { code: '100', name: 'Kasa', type: 'A', group: 'assets_current', balance: 0, dr: 0, cr: 0 }, // [cite: 3]
-    { code: '101', name: 'Alınan Çekler', type: 'A', group: 'assets_current', balance: 0, dr: 0, cr: 0 }, // [cite: 4]
-    { code: '102', name: 'Bankalar', type: 'A', group: 'assets_current', balance: 0, dr: 0, cr: 0 }, // [cite: 5]
-    { code: '103', name: 'Verilen Çekler ve Ödeme Emirleri (-)', type: 'A', group: 'assets_current', balance: 0, dr: 0, cr: 0 }, // [cite: 6]
-    { code: '110', name: 'Hisse Senetleri', type: 'A', group: 'assets_current', balance: 0, dr: 0, cr: 0 }, // [cite: 9]
-    { code: '120', name: 'Alıcılar', type: 'A', group: 'assets_current', balance: 0, dr: 0, cr: 0 }, // [cite: 15]
-    { code: '121', name: 'Alacak Senetleri', type: 'A', group: 'assets_current', balance: 0, dr: 0, cr: 0 }, // [cite: 16]
-    { code: '153', name: 'Ticari Mallar', type: 'A', group: 'assets_current', balance: 0, dr: 0, cr: 0 }, // [cite: 72]
-    { code: '190', name: 'Devreden KDV', type: 'A', group: 'assets_current', balance: 0, dr: 0, cr: 0 }, // [cite: 84]
-    { code: '191', name: 'İndirilecek KDV', type: 'A', group: 'assets_current', balance: 0, dr: 0, cr: 0 }, // [cite: 85]
-    { code: '195', name: 'İş Avansları', type: 'A', group: 'assets_current', balance: 0, dr: 0, cr: 0 }, // [cite: 88]
+    // --- 1. DÖNEN VARLIKLAR ---
+    { code: '100', name: 'Kasa', type: 'A', group: 'assets_current', balance: 0, dr: 0, cr: 0 },
+    { code: '101', name: 'Alınan Çekler', type: 'A', group: 'assets_current', balance: 0, dr: 0, cr: 0 },
+    { code: '102', name: 'Bankalar', type: 'A', group: 'assets_current', balance: 0, dr: 0, cr: 0 },
+    { code: '103', name: 'Verilen Çekler ve Ödeme Emirleri (-)', type: 'A', group: 'assets_current', balance: 0, dr: 0, cr: 0 },
+    { code: '110', name: 'Hisse Senetleri', type: 'A', group: 'assets_current', balance: 0, dr: 0, cr: 0 },
+    { code: '120', name: 'Alıcılar', type: 'A', group: 'assets_current', balance: 0, dr: 0, cr: 0 },
+    { code: '121', name: 'Alacak Senetleri', type: 'A', group: 'assets_current', balance: 0, dr: 0, cr: 0 },
+    { code: '153', name: 'Ticari Mallar', type: 'A', group: 'assets_current', balance: 0, dr: 0, cr: 0 },
+    { code: '159', name: 'Verilen Sipariş Avansları', type: 'A', group: 'assets_current', balance: 0, dr: 0, cr: 0 }, // YENİ
+    { code: '190', name: 'Devreden KDV', type: 'A', group: 'assets_current', balance: 0, dr: 0, cr: 0 },
+    { code: '191', name: 'İndirilecek KDV', type: 'A', group: 'assets_current', balance: 0, dr: 0, cr: 0 },
+    { code: '195', name: 'İş Avansları', type: 'A', group: 'assets_current', balance: 0, dr: 0, cr: 0 },
 
-    // --- 2. DURAN VARLIKLAR [cite: 21] ---
-    { code: '252', name: 'Binalar', type: 'A', group: 'assets_fixed', balance: 0, dr: 0, cr: 0 }, // [cite: 104]
-    { code: '254', name: 'Taşıtlar', type: 'A', group: 'assets_fixed', balance: 0, dr: 0, cr: 0 }, // [cite: 106]
-    { code: '255', name: 'Demirbaşlar', type: 'A', group: 'assets_fixed', balance: 0, dr: 0, cr: 0 }, // [cite: 107]
-    { code: '257', name: 'Birikmiş Amortismanlar (-)', type: 'A', group: 'assets_fixed', balance: 0, dr: 0, cr: 0 }, // [cite: 109]
+    // --- 2. DURAN VARLIKLAR ---
+    { code: '252', name: 'Binalar', type: 'A', group: 'assets_fixed', balance: 0, dr: 0, cr: 0 },
+    { code: '254', name: 'Taşıtlar', type: 'A', group: 'assets_fixed', balance: 0, dr: 0, cr: 0 },
+    { code: '255', name: 'Demirbaşlar', type: 'A', group: 'assets_fixed', balance: 0, dr: 0, cr: 0 },
+    { code: '257', name: 'Birikmiş Amortismanlar (-)', type: 'A', group: 'assets_fixed', balance: 0, dr: 0, cr: 0 },
 
-    // --- 3. KISA VADELİ YABANCI KAYNAKLAR [cite: 37] ---
-    { code: '300', name: 'Banka Kredileri', type: 'L', group: 'liab_short', balance: 0, dr: 0, cr: 0 }, // [cite: 39]
-    { code: '320', name: 'Satıcılar', type: 'L', group: 'liab_short', balance: 0, dr: 0, cr: 0 }, // [cite: 46]
-    { code: '321', name: 'Borç Senetleri', type: 'L', group: 'liab_short', balance: 0, dr: 0, cr: 0 }, // [cite: 47]
-    { code: '335', name: 'Personele Borçlar', type: 'L', group: 'liab_short', balance: 0, dr: 0, cr: 0 }, // [cite: 142]
-    { code: '360', name: 'Ödenecek Vergi ve Fonlar', type: 'L', group: 'liab_short', balance: 0, dr: 0, cr: 0 }, // [cite: 152]
-    { code: '361', name: 'Ödenecek Sosyal Güv. Kesintileri', type: 'L', group: 'liab_short', balance: 0, dr: 0, cr: 0 }, // [cite: 153]
-    { code: '391', name: 'Hesaplanan KDV', type: 'L', group: 'liab_short', balance: 0, dr: 0, cr: 0 }, // [cite: 167]
+    // --- 3. KISA VADELİ YABANCI KAYNAKLAR ---
+    { code: '300', name: 'Banka Kredileri', type: 'L', group: 'liab_short', balance: 0, dr: 0, cr: 0 },
+    { code: '320', name: 'Satıcılar', type: 'L', group: 'liab_short', balance: 0, dr: 0, cr: 0 },
+    { code: '321', name: 'Borç Senetleri', type: 'L', group: 'liab_short', balance: 0, dr: 0, cr: 0 },
+    { code: '335', name: 'Personele Borçlar', type: 'L', group: 'liab_short', balance: 0, dr: 0, cr: 0 },
+    { code: '340', name: 'Alınan Sipariş Avansları', type: 'L', group: 'liab_short', balance: 0, dr: 0, cr: 0 }, // YENİ
+    { code: '360', name: 'Ödenecek Vergi ve Fonlar', type: 'L', group: 'liab_short', balance: 0, dr: 0, cr: 0 },
+    { code: '361', name: 'Ödenecek Sosyal Güv. Kesintileri', type: 'L', group: 'liab_short', balance: 0, dr: 0, cr: 0 },
+    { code: '391', name: 'Hesaplanan KDV', type: 'L', group: 'liab_short', balance: 0, dr: 0, cr: 0 },
 
-    // --- 4. UZUN VADELİ YABANCI KAYNAKLAR [cite: 172] ---
-    { code: '400', name: 'Banka Kredileri (Uzun)', type: 'L', group: 'liab_long', balance: 0, dr: 0, cr: 0 }, // [cite: 174]
+    // --- 4. UZUN VADELİ YABANCI KAYNAKLAR ---
+    { code: '400', name: 'Banka Kredileri (Uzun)', type: 'L', group: 'liab_long', balance: 0, dr: 0, cr: 0 },
 
-    // --- 5. ÖZKAYNAKLAR [cite: 207] ---
-    { code: '500', name: 'Sermaye', type: 'E', group: 'equity', balance: 0, dr: 0, cr: 0 }, // [cite: 209]
-    { code: '590', name: 'Dönem Net Karı', type: 'E', group: 'equity', balance: 0, dr: 0, cr: 0 }, // [cite: 231]
+    // --- 5. ÖZKAYNAKLAR ---
+    { code: '500', name: 'Sermaye', type: 'E', group: 'equity', balance: 0, dr: 0, cr: 0 },
+    { code: '590', name: 'Dönem Net Karı', type: 'E', group: 'equity', balance: 0, dr: 0, cr: 0 },
 
-    // --- 6. GELİR TABLOSU HESAPLARI [cite: 233] ---
-    { code: '600', name: 'Yurt İçi Satışlar', type: 'I', group: 'income', balance: 0, dr: 0, cr: 0 }, // [cite: 235]
-    { code: '602', name: 'Diğer Gelirler', type: 'I', group: 'income', balance: 0, dr: 0, cr: 0 }, // [cite: 237]
-    { code: '621', name: 'Satılan Malın Maliyeti (-)', type: 'X', group: 'expense', balance: 0, dr: 0, cr: 0 }, // [cite: 242]
-    { code: '642', name: 'Faiz Gelirleri', type: 'I', group: 'income', balance: 0, dr: 0, cr: 0 }, // [cite: 249]
-    { code: '657', name: 'Reeskont Faiz Giderleri (-)', type: 'X', group: 'expense', balance: 0, dr: 0, cr: 0 }, // [cite: 261]
+    // --- 6. GELİR TABLOSU HESAPLARI ---
+    { code: '600', name: 'Yurt İçi Satışlar', type: 'I', group: 'income', balance: 0, dr: 0, cr: 0 },
+    { code: '602', name: 'Diğer Gelirler', type: 'I', group: 'income', balance: 0, dr: 0, cr: 0 },
+    { code: '621', name: 'Satılan Malın Maliyeti (-)', type: 'X', group: 'expense', balance: 0, dr: 0, cr: 0 },
+    { code: '642', name: 'Faiz Gelirleri', type: 'I', group: 'income', balance: 0, dr: 0, cr: 0 },
+    { code: '657', name: 'Reeskont Faiz Giderleri (-)', type: 'X', group: 'expense', balance: 0, dr: 0, cr: 0 },
 
-    // --- 7. MALİYET HESAPLARI (7/A) [cite: 272] ---
-    { code: '760', name: 'Pazarlama, Satış ve Dağ. Giderleri', type: 'X', group: 'expense', balance: 0, dr: 0, cr: 0 }, // [cite: 295]
-    { code: '770', name: 'Genel Yönetim Giderleri', type: 'X', group: 'expense', balance: 0, dr: 0, cr: 0 }, // [cite: 299]
-    { code: '780', name: 'Finansman Giderleri', type: 'X', group: 'expense', balance: 0, dr: 0, cr: 0 }, // [cite: 303]
+    // --- 7. MALİYET HESAPLARI (7/A) ---
+    { code: '760', name: 'Pazarlama, Satış ve Dağ. Giderleri', type: 'X', group: 'expense', balance: 0, dr: 0, cr: 0 }, // YENİ
+    { code: '770', name: 'Genel Yönetim Giderleri', type: 'X', group: 'expense', balance: 0, dr: 0, cr: 0 },
+    { code: '780', name: 'Finansman Giderleri', type: 'X', group: 'expense', balance: 0, dr: 0, cr: 0 },
 ];
 
 // Senaryo Şablonları ve Doğrulama Mantığı
 const ScenarioEngine = {
     generate: (turn, multiplier) => {
-        // PDF'teki hesaplara dayalı genişletilmiş senaryolar
         const templates = [
             'sale_cash', 'sale_check', 'purchase_credit', 'purchase_note', 
             'expense_rent', 'salary_accrual', 'bank_loan_long', 'tax_payment',
-            'buy_vehicle', 'interest_income', 'customer_collection'
+            'buy_vehicle', 'interest_income', 'customer_collection',
+            'capital_increase', 'marketing_expense', 'received_advance', 'given_advance'
         ];
         
         const type = templates[Math.floor(Math.random() * templates.length)];
@@ -80,7 +80,7 @@ const ScenarioEngine = {
         };
 
         switch (type) {
-            case 'sale_cash': // [cite: 3, 235, 167, 242, 72]
+            case 'sale_cash': 
                 scenarioData.text = `Müşteriye ${formatDataMoney(baseAmount)} TL + KDV (%20) tutarında mal satıldı. Bedeli PEŞİN (Nakit) tahsil edildi. (Maliyet: ${formatDataMoney(costAmount)} TL)`;
                 scenarioData.correctEntries = [
                     { code: '100', type: 'debit', amount: totalAmount }, 
@@ -91,8 +91,8 @@ const ScenarioEngine = {
                 ];
                 break;
             
-            case 'sale_check': // [cite: 4, 235, 167] - 101 Alınan Çekler Kullanımı
-                scenarioData.text = `Müşteriye ${formatDataMoney(baseAmount)} TL + KDV (%20) tutarında mal satıldı. Karşılığında ÇEK alındı. (Maliyet kaydı ihmal edilebilir, sadece satış)`;
+            case 'sale_check':
+                scenarioData.text = `Müşteriye ${formatDataMoney(baseAmount)} TL + KDV (%20) tutarında mal satıldı. Karşılığında ÇEK alındı. (Maliyet kaydını bu seferlik yapmayın)`;
                 scenarioData.correctEntries = [
                     { code: '101', type: 'debit', amount: totalAmount },
                     { code: '600', type: 'credit', amount: baseAmount },
@@ -100,7 +100,7 @@ const ScenarioEngine = {
                 ];
                 break;
 
-            case 'purchase_credit': // [cite: 72, 85, 46]
+            case 'purchase_credit': 
                 scenarioData.text = `Satıcıdan ${formatDataMoney(baseAmount)} TL + KDV (%20) tutarında ticari mal alındı. Ödeme VADELİ (Veresiye).`;
                 scenarioData.correctEntries = [
                     { code: '153', type: 'debit', amount: baseAmount },
@@ -109,7 +109,7 @@ const ScenarioEngine = {
                 ];
                 break;
             
-            case 'purchase_note': // [cite: 72, 85, 47] - 321 Borç Senetleri Kullanımı
+            case 'purchase_note': 
                 scenarioData.text = `Satıcıdan ${formatDataMoney(baseAmount)} TL + KDV (%20) tutarında mal alındı. Karşılığında SENET verildi.`;
                 scenarioData.correctEntries = [
                     { code: '153', type: 'debit', amount: baseAmount },
@@ -118,7 +118,7 @@ const ScenarioEngine = {
                 ];
                 break;
 
-            case 'expense_rent': // [cite: 299, 85, 5]
+            case 'expense_rent': 
                 scenarioData.text = `Yönetim binası kirası olan ${formatDataMoney(baseAmount)} TL + KDV (%20) banka hesabından ödendi.`;
                 scenarioData.correctEntries = [
                     { code: '770', type: 'debit', amount: baseAmount },
@@ -127,8 +127,7 @@ const ScenarioEngine = {
                 ];
                 break;
             
-            case 'salary_accrual': // [cite: 299, 142] - Maaş Tahakkuku (Basitleştirilmiş)
-                // SGK ve Vergi hesaplarını detaylandırmak yerine brüt üzerinden basit tahakkuk
+            case 'salary_accrual': 
                 scenarioData.text = `Personel maaş tahakkuku yapıldı. Brüt Ücret: ${formatDataMoney(baseAmount)} TL. (Henüz ödenmedi, borçlanıldı).`;
                 scenarioData.correctEntries = [
                     { code: '770', type: 'debit', amount: baseAmount },
@@ -136,7 +135,7 @@ const ScenarioEngine = {
                 ];
                 break;
 
-            case 'bank_loan_long': // [cite: 5, 174] - Uzun Vadeli Kredi
+            case 'bank_loan_long':
                 scenarioData.text = `Bankadan yatırım amaçlı ${formatDataMoney(baseAmount * 10)} TL tutarında UZUN VADELİ kredi çekildi ve hesaba geçti.`;
                 scenarioData.correctEntries = [
                     { code: '102', type: 'debit', amount: baseAmount * 10 },
@@ -144,7 +143,7 @@ const ScenarioEngine = {
                 ];
                 break;
 
-            case 'tax_payment': // [cite: 152, 5] - Vergi Ödemesi
+            case 'tax_payment':
                 scenarioData.text = `Geçen aydan tahakkuk eden ${formatDataMoney(baseAmount)} TL tutarındaki Vergi borcu bankadan ödendi.`;
                 scenarioData.correctEntries = [
                     { code: '360', type: 'debit', amount: baseAmount },
@@ -152,7 +151,7 @@ const ScenarioEngine = {
                 ];
                 break;
             
-            case 'buy_vehicle': // [cite: 106, 85, 5] - Taşıt Alımı
+            case 'buy_vehicle':
                 let vehiclePrice = baseAmount * 5;
                 let vehicleVat = vehiclePrice * 0.20;
                 let vehicleTotal = vehiclePrice + vehicleVat;
@@ -164,7 +163,7 @@ const ScenarioEngine = {
                 ];
                 break;
 
-            case 'interest_income': // [cite: 5, 249] - Faiz Geliri
+            case 'interest_income':
                 scenarioData.text = `Banka mevduat hesabına ${formatDataMoney(baseAmount / 2)} TL net faiz tahakkuk etti.`;
                 scenarioData.correctEntries = [
                     { code: '102', type: 'debit', amount: baseAmount / 2 },
@@ -172,11 +171,44 @@ const ScenarioEngine = {
                 ];
                 break;
 
-            case 'customer_collection': // [cite: 15, 3] - Alıcılardan Tahsilat
+            case 'customer_collection': 
                 scenarioData.text = `Müşterilerden (Alıcılar) olan alacağın ${formatDataMoney(baseAmount)} TL kısmı NAKİT tahsil edildi.`;
                 scenarioData.correctEntries = [
                     { code: '100', type: 'debit', amount: baseAmount },
                     { code: '120', type: 'credit', amount: baseAmount }
+                ];
+                break;
+            
+            case 'capital_increase': // YENİ
+                scenarioData.text = `Ortaklar şirkete ${formatDataMoney(baseAmount * 2)} TL nakit sermaye ilave etti (Banka hesabına).`;
+                scenarioData.correctEntries = [
+                    { code: '102', type: 'debit', amount: baseAmount * 2 },
+                    { code: '500', type: 'credit', amount: baseAmount * 2 }
+                ];
+                break;
+
+            case 'marketing_expense': // YENİ
+                scenarioData.text = `Reklam ajansına ${formatDataMoney(baseAmount)} TL + KDV tutarında pazarlama hizmet bedeli bankadan ödendi.`;
+                scenarioData.correctEntries = [
+                    { code: '760', type: 'debit', amount: baseAmount },
+                    { code: '191', type: 'debit', amount: vatAmount },
+                    { code: '102', type: 'credit', amount: totalAmount }
+                ];
+                break;
+
+            case 'received_advance': // YENİ (340)
+                scenarioData.text = `Bir müşteriden gelecek sipariş için ${formatDataMoney(baseAmount)} TL nakit sipariş avansı alındı.`;
+                scenarioData.correctEntries = [
+                    { code: '100', type: 'debit', amount: baseAmount },
+                    { code: '340', type: 'credit', amount: baseAmount }
+                ];
+                break;
+            
+            case 'given_advance': // YENİ (159)
+                scenarioData.text = `Hammadde alımı için satıcı firmaya ${formatDataMoney(baseAmount)} TL tutarında sipariş avansı bankadan gönderildi.`;
+                scenarioData.correctEntries = [
+                    { code: '159', type: 'debit', amount: baseAmount },
+                    { code: '102', type: 'credit', amount: baseAmount }
                 ];
                 break;
         }

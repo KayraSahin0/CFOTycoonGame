@@ -6,10 +6,11 @@
 const GameState = {
     mode: 'sandbox', // 'sandbox' | 'career'
     difficulty: 'easy', // 'easy' | 'hard'
+    companyName: 'Girişimci A.Ş.',
     money: 0,
     score: 0,
     turn: 1,
-    title: 'Girişimci',
+    title: 'Startup',
     multiplier: 1,
     accounts: [], 
     currentScenario: null,
@@ -28,6 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
         .swal2-confirm { background-color: #059669 !important; /* emerald-600 */ }
         .swal2-deny { background-color: #dc2626 !important; /* red-600 */ }
         .swal2-cancel { background-color: #475569 !important; /* slate-600 */ }
+        .swal2-input { background-color: #334155 !important; color: white !important; }
     `;
     document.head.appendChild(style);
 
@@ -61,8 +63,26 @@ function startCareerSetup() {
         confirmButtonText: 'Kolay (Stajyer) - Otomatik Raporlar',
         denyButtonText: 'Zor (CFO) - Manuel Hesaplama',
         allowOutsideClick: false
-    }).then((result) => {
+    }).then(async (result) => {
         const diff = result.isDenied ? 'hard' : 'easy';
+        
+        // Şirket İsmi Sorma Adımı
+        const { value: companyName } = await Swal.fire({
+            title: 'Şirketine İsim Ver',
+            input: 'text',
+            inputLabel: 'Şirket Adı (İsteğe Bağlı)',
+            inputPlaceholder: 'Örn: Teknoloji A.Ş.',
+            showCancelButton: true,
+            confirmButtonText: 'Başla',
+            cancelButtonText: 'Atla (Varsayılan)',
+            inputValidator: (value) => {
+                if (value.length > 20) {
+                  return 'Şirket ismi çok uzun!';
+                }
+            }
+        });
+
+        GameState.companyName = companyName || 'Girişimci A.Ş.';
         startGame('career', diff);
     });
 }
@@ -81,10 +101,10 @@ function startGame(mode, difficulty) {
         cashAcc.balance = 50000; cashAcc.dr = 50000;
         capitalAcc.balance = 50000; capitalAcc.cr = 50000;
         GameState.money = 50000;
-        GameState.title = "Sandbox Kralı";
+        GameState.companyName = "Sandbox Kralı";
     } else {
         GameState.money = 0;
-        GameState.title = "Startup";
+        // Company Name zaten set edildi
     }
 
     updateUI();
@@ -121,10 +141,12 @@ function generateNewTurn() {
 
     GameState.currentScenario = ScenarioEngine.generate(GameState.turn, GameState.multiplier);
     
+    // UI Güncelle
     document.getElementById('scenarioText').innerText = GameState.currentScenario.text;
     document.getElementById('turnBadge').innerText = `Ay: ${GameState.turn}`;
     document.getElementById('titleBadge').innerText = GameState.title;
     document.getElementById('scoreBadge').innerText = GameState.score;
+    document.getElementById('companyNameDisplay').innerText = GameState.companyName;
     
     GameState.journalEntry = [];
     renderJournalTable();
@@ -171,7 +193,6 @@ function useHelp() {
             
             GameState.currentScenario.correctEntries.forEach(correct => {
                 const acc = GameState.accounts.find(a => a.code === correct.code);
-                // Eğer hesap data.js'de yoksa hata vermesin diye kontrol (Initial accounts genişletildi ama güvenlik olsun)
                 if(acc) {
                     GameState.journalEntry.push({
                         code: correct.code,
@@ -308,8 +329,6 @@ function saveTransaction() {
     // 4. İflas Kontrolü
     const cash = GameState.accounts.find(a => a.code === '100').balance;
     const banks = GameState.accounts.find(a => a.code === '102').balance;
-    // Banka kredisi limiti yoksa negatif bakiye iflas sebebidir, ama banka kredi bakiyesi de olabilir.
-    // Basitlik için net nakit pozisyonuna bakalım
     if (cash + banks < -50000 && GameState.mode === 'career') {
         Swal.fire('İFLAS!', 'Nakit akışını yönetemediniz. Şirket battı.', 'error').then(() => location.reload());
         return;
