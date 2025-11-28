@@ -139,7 +139,8 @@ function generateNewTurn() {
         else { GameState.title = "Startup"; GameState.multiplier = 1; }
     }
 
-    GameState.currentScenario = ScenarioEngine.generate(GameState.turn, GameState.multiplier);
+    // Title parametresini gönderiyoruz
+    GameState.currentScenario = ScenarioEngine.generate(GameState.turn, GameState.multiplier, GameState.title);
     
     // UI Güncelle
     document.getElementById('scenarioText').innerText = GameState.currentScenario.text;

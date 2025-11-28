@@ -14,7 +14,7 @@ const INITIAL_ACCOUNTS = [
     { code: '120', name: 'Alıcılar', type: 'A', group: 'assets_current', balance: 0, dr: 0, cr: 0 },
     { code: '121', name: 'Alacak Senetleri', type: 'A', group: 'assets_current', balance: 0, dr: 0, cr: 0 },
     { code: '153', name: 'Ticari Mallar', type: 'A', group: 'assets_current', balance: 0, dr: 0, cr: 0 },
-    { code: '159', name: 'Verilen Sipariş Avansları', type: 'A', group: 'assets_current', balance: 0, dr: 0, cr: 0 }, // YENİ
+    { code: '159', name: 'Verilen Sipariş Avansları', type: 'A', group: 'assets_current', balance: 0, dr: 0, cr: 0 }, 
     { code: '190', name: 'Devreden KDV', type: 'A', group: 'assets_current', balance: 0, dr: 0, cr: 0 },
     { code: '191', name: 'İndirilecek KDV', type: 'A', group: 'assets_current', balance: 0, dr: 0, cr: 0 },
     { code: '195', name: 'İş Avansları', type: 'A', group: 'assets_current', balance: 0, dr: 0, cr: 0 },
@@ -30,7 +30,7 @@ const INITIAL_ACCOUNTS = [
     { code: '320', name: 'Satıcılar', type: 'L', group: 'liab_short', balance: 0, dr: 0, cr: 0 },
     { code: '321', name: 'Borç Senetleri', type: 'L', group: 'liab_short', balance: 0, dr: 0, cr: 0 },
     { code: '335', name: 'Personele Borçlar', type: 'L', group: 'liab_short', balance: 0, dr: 0, cr: 0 },
-    { code: '340', name: 'Alınan Sipariş Avansları', type: 'L', group: 'liab_short', balance: 0, dr: 0, cr: 0 }, // YENİ
+    { code: '340', name: 'Alınan Sipariş Avansları', type: 'L', group: 'liab_short', balance: 0, dr: 0, cr: 0 }, 
     { code: '360', name: 'Ödenecek Vergi ve Fonlar', type: 'L', group: 'liab_short', balance: 0, dr: 0, cr: 0 },
     { code: '361', name: 'Ödenecek Sosyal Güv. Kesintileri', type: 'L', group: 'liab_short', balance: 0, dr: 0, cr: 0 },
     { code: '391', name: 'Hesaplanan KDV', type: 'L', group: 'liab_short', balance: 0, dr: 0, cr: 0 },
@@ -50,22 +50,66 @@ const INITIAL_ACCOUNTS = [
     { code: '657', name: 'Reeskont Faiz Giderleri (-)', type: 'X', group: 'expense', balance: 0, dr: 0, cr: 0 },
 
     // --- 7. MALİYET HESAPLARI (7/A) ---
-    { code: '760', name: 'Pazarlama, Satış ve Dağ. Giderleri', type: 'X', group: 'expense', balance: 0, dr: 0, cr: 0 }, // YENİ
+    { code: '760', name: 'Pazarlama, Satış ve Dağ. Giderleri', type: 'X', group: 'expense', balance: 0, dr: 0, cr: 0 }, 
     { code: '770', name: 'Genel Yönetim Giderleri', type: 'X', group: 'expense', balance: 0, dr: 0, cr: 0 },
     { code: '780', name: 'Finansman Giderleri', type: 'X', group: 'expense', balance: 0, dr: 0, cr: 0 },
 ];
 
 // Senaryo Şablonları ve Doğrulama Mantığı
 const ScenarioEngine = {
-    generate: (turn, multiplier) => {
-        const templates = [
-            'sale_cash', 'sale_check', 'purchase_credit', 'purchase_note', 
-            'expense_rent', 'salary_accrual', 'bank_loan_long', 'tax_payment',
-            'buy_vehicle', 'interest_income', 'customer_collection',
-            'capital_increase', 'marketing_expense', 'received_advance', 'given_advance'
-        ];
+    // Şablonları kategorize edelim
+    templates: {
+        positive: ['sale_cash', 'sale_check', 'interest_income', 'capital_increase'], // Özkaynak artırıcı (Gelir/Sermaye)
+        negative: ['expense_rent', 'salary_accrual', 'tax_payment', 'marketing_expense'], // Özkaynak azaltıcı (Gider)
+        neutral: ['purchase_credit', 'purchase_note', 'bank_loan_long', 'buy_vehicle', 'customer_collection', 'received_advance', 'given_advance'] // Bilanço değişimi
+    },
+
+    getWeightedRandomTemplate: (title) => {
+        // 1. Unvana göre Pozitif Senaryo Aralığını belirle
+        let minPos, maxPos;
+
+        if (title === 'Startup') {
+            minPos = 0.50; maxPos = 0.65;
+        } else if (title === 'KOBİ') {
+            minPos = 0.40; maxPos = 0.50;
+        } else if (title === 'A.Ş.') {
+            minPos = 0.30; maxPos = 0.40;
+        } else { // Holding ve üzeri
+            minPos = 0.10; maxPos = 0.30;
+        }
+
+        // 2. Bu aralıkta rastgele bir Pozitif olasılığı seç
+        const probPositive = Math.random() * (maxPos - minPos) + minPos;
         
-        const type = templates[Math.floor(Math.random() * templates.length)];
+        // 3. Kalan olasılığı (%100 - Pozitif) hesapla
+        const remaining = 1 - probPositive;
+        
+        // 4. Kalan kısmı Negatif ve Nötr arasında rastgele dağıt
+        // Rastgeleliği bozmamak için kalanın rastgele bir parçasını negatife veriyoruz.
+        const probNegative = remaining * Math.random(); 
+        // Geri kalanı da nötre kalıyor
+        // (Böylece toplam her zaman 1.0 eder)
+        
+        // 5. Kategori Seçimi
+        const rand = Math.random();
+        let selectedCategory = 'neutral';
+
+        if (rand < probPositive) {
+            selectedCategory = 'positive';
+        } else if (rand < probPositive + probNegative) {
+            selectedCategory = 'negative';
+        } else {
+            selectedCategory = 'neutral';
+        }
+
+        // Seçilen kategoriden rastgele bir şablon döndür
+        const categoryList = ScenarioEngine.templates[selectedCategory];
+        return categoryList[Math.floor(Math.random() * categoryList.length)];
+    },
+
+    generate: (turn, multiplier, title) => {
+        // Ağırlıklı rastgele seçim fonksiyonunu kullan
+        const type = ScenarioEngine.getWeightedRandomTemplate(title);
         
         // Tutar belirleme
         let baseAmount = Math.round((Math.random() * 5000 + 1000) * multiplier / 100) * 100;
@@ -179,7 +223,7 @@ const ScenarioEngine = {
                 ];
                 break;
             
-            case 'capital_increase': // YENİ
+            case 'capital_increase': 
                 scenarioData.text = `Ortaklar şirkete ${formatDataMoney(baseAmount * 2)} TL nakit sermaye ilave etti (Banka hesabına).`;
                 scenarioData.correctEntries = [
                     { code: '102', type: 'debit', amount: baseAmount * 2 },
@@ -187,7 +231,7 @@ const ScenarioEngine = {
                 ];
                 break;
 
-            case 'marketing_expense': // YENİ
+            case 'marketing_expense': 
                 scenarioData.text = `Reklam ajansına ${formatDataMoney(baseAmount)} TL + KDV tutarında pazarlama hizmet bedeli bankadan ödendi.`;
                 scenarioData.correctEntries = [
                     { code: '760', type: 'debit', amount: baseAmount },
@@ -196,7 +240,7 @@ const ScenarioEngine = {
                 ];
                 break;
 
-            case 'received_advance': // YENİ (340)
+            case 'received_advance': 
                 scenarioData.text = `Bir müşteriden gelecek sipariş için ${formatDataMoney(baseAmount)} TL nakit sipariş avansı alındı.`;
                 scenarioData.correctEntries = [
                     { code: '100', type: 'debit', amount: baseAmount },
@@ -204,7 +248,7 @@ const ScenarioEngine = {
                 ];
                 break;
             
-            case 'given_advance': // YENİ (159)
+            case 'given_advance': 
                 scenarioData.text = `Hammadde alımı için satıcı firmaya ${formatDataMoney(baseAmount)} TL tutarında sipariş avansı bankadan gönderildi.`;
                 scenarioData.correctEntries = [
                     { code: '159', type: 'debit', amount: baseAmount },
