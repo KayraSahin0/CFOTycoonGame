@@ -45,6 +45,10 @@
                 <span id="titleBadge" class="bg-blue-900 text-blue-200 text-xs px-2 py-1 rounded-full ml-2 border border-blue-700">Startup</span>
             </div>
             <div class="flex items-center gap-3">
+                <button onclick="openLeaderboard()" class="bg-slate-800 hover:bg-slate-700 text-purple-400 px-3 py-1.5 rounded border border-slate-700 transition" title="Liderlik Tablosu">
+                    <i class="fa-solid fa-chart-simple"></i>
+                </button>
+
                 <button onclick="openAchievements()" class="bg-slate-800 hover:bg-slate-700 text-yellow-500 px-3 py-1.5 rounded border border-slate-700 transition" title="Başarımlar">
                     <i class="fa-solid fa-trophy"></i>
                 </button>
@@ -86,20 +90,25 @@
                         <label class="block text-xs text-slate-500 mb-1">Hesap Seçimi</label>
                         <select id="accountSelect" class="w-full text-sm bg-slate-800 border border-slate-700 text-slate-200 rounded-md p-2 focus:ring-2 focus:ring-blue-600 focus:border-blue-600 outline-none transition">
                             <option value="">Hesap Seçin...</option>
-                            </select>
+                        </select>
                     </div>
 
                     <div class="grid grid-cols-2 gap-2">
-                        <div>
+                        <div class="col-span-1">
                             <label class="block text-xs text-slate-500 mb-1">Yön</label>
-                            <select id="entryType" class="w-full text-sm bg-slate-800 border border-slate-700 text-slate-200 rounded-md p-2 outline-none transition">
-                                <option value="debit">Borç (Dr)</option>
-                                <option value="credit">Alacak (Cr)</option>
-                            </select>
+                            <label class="toggle-container">
+                                <input type="checkbox" id="entryTypeToggle">
+                                <span class="toggle-track">
+                                    <span class="track-label-dr">BORÇ (Dr)</span>
+                                    <span class="track-label-cr">ALACAK (Cr)</span>
+                                </span>
+                                <span class="toggle-slider"></span>
+                            </label>
                         </div>
-                        <div>
+
+                        <div class="col-span-1">
                             <label class="block text-xs text-slate-500 mb-1">Tutar</label>
-                            <input type="number" id="amountInput" class="w-full text-sm bg-slate-800 border border-slate-700 text-slate-200 rounded-md p-2 outline-none transition placeholder-slate-600" placeholder="0.00">
+                            <input type="number" id="amountInput" class="w-full h-12 text-sm bg-slate-800 border border-slate-700 text-slate-200 rounded-md p-2 outline-none transition placeholder-slate-600 font-mono text-right text-lg" placeholder="0.00">
                         </div>
                     </div>
 
@@ -246,7 +255,7 @@
                 <h4 class="text-blue-400 font-bold border-b border-slate-700 pb-1 mt-4">3. Oyun Akışı</h4>
                 <ol class="list-decimal pl-5 space-y-1 text-slate-400">
                     <li>Sol üstteki <b>Senaryo</b> kartını dikkatlice okuyun.</li>
-                    <li>İlgili hesabı, yönü (Borç/Alacak) ve tutarı girerek <b>"Ekle"</b> butonuna basın.</li>
+                    <li>İlgili hesabı, yönü (Borç/Alacak) seçin ve tutarı girerek <b>"Satır Ekle"</b> butonuna basın.</li>
                     <li>Tüm kalemleri girdikten sonra <b>"KONTROL ET & KAYDET"</b> butonuna basın.</li>
                     <li>Takıldığınızda sağ üstteki <b>"Yardım Al"</b> butonunu kullanabilirsiniz (Puan kazandırmaz).</li>
                 </ol>
@@ -267,6 +276,32 @@
                 </div>
             <div class="p-4 bg-slate-900 border-t border-slate-700 text-right">
                 <button onclick="closeAchievements()" class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded font-bold transition">Kapat</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="leaderboardModal" class="fixed inset-0 bg-slate-900/80 z-50 hidden flex items-center justify-center backdrop-blur-sm">
+        <div class="bg-slate-800 w-full max-w-md rounded-xl border border-slate-700 shadow-2xl overflow-hidden animate__animated animate__zoomIn">
+            <div class="p-4 bg-slate-900 border-b border-slate-700 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-white"><i class="fa-solid fa-chart-simple mr-2 text-purple-400"></i>Liderlik Tablosu</h3>
+                <button onclick="closeLeaderboard()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div class="p-0">
+                <table class="w-full text-sm text-left text-slate-400">
+                    <thead class="text-xs text-slate-200 uppercase bg-slate-700/50">
+                        <tr>
+                            <th class="px-6 py-3">#</th>
+                            <th class="px-6 py-3">Şirket</th>
+                            <th class="px-6 py-3 text-right">Puan</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboardList" class="divide-y divide-slate-700">
+                        </tbody>
+                </table>
+                <div id="noScoreMsg" class="hidden p-4 text-center text-slate-500 italic">Henüz kayıtlı skor yok.</div>
+            </div>
+            <div class="p-4 bg-slate-900 border-t border-slate-700 text-right">
+                <button onclick="closeLeaderboard()" class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded font-bold transition">Kapat</button>
             </div>
         </div>
     </div>

@@ -13,10 +13,26 @@ const GameState = {
     title: 'Startup',
     multiplier: 1,
     accounts: [], 
-    achievements: [], // YENİ
+    achievements: [],
     currentScenario: null,
     journalEntry: [],
     helpUsed: false
+};
+
+// --- LEADERBOARD HELPER ---
+const Leaderboard = {
+    key: 'cfo_tycoon_highscores_v1',
+    save: (name, score) => {
+        let scores = Leaderboard.get();
+        scores.push({ name, score, date: new Date().toLocaleDateString('tr-TR') });
+        scores.sort((a, b) => b.score - a.score);
+        scores = scores.slice(0, 10); // İlk 10
+        localStorage.setItem(Leaderboard.key, JSON.stringify(scores));
+    },
+    get: () => {
+        const data = localStorage.getItem(Leaderboard.key);
+        return data ? JSON.parse(data) : [];
+    }
 };
 
 // --- INIT ---
@@ -92,7 +108,7 @@ function startGame(mode, difficulty) {
     GameState.mode = mode;
     GameState.difficulty = difficulty;
     GameState.accounts = JSON.parse(JSON.stringify(INITIAL_ACCOUNTS)); // Deep copy
-    GameState.achievements = JSON.parse(JSON.stringify(ACHIEVEMENTS)); // YENİ
+    GameState.achievements = JSON.parse(JSON.stringify(ACHIEVEMENTS));
     GameState.turn = 1;
     GameState.score = 0;
     GameState.journalEntry = [];
@@ -106,7 +122,6 @@ function startGame(mode, difficulty) {
         GameState.companyName = "Sandbox Kralı";
     } else {
         GameState.money = 0;
-        // Company Name zaten set edildi
     }
 
     updateUI();
@@ -156,7 +171,11 @@ function generateNewTurn() {
 
 function addToJournal() {
     const accCode = document.getElementById('accountSelect').value;
-    const type = document.getElementById('entryType').value;
+    
+    // Checkbox durumu: Checked = Alacak (Credit), Unchecked = Borç (Debit)
+    const isCredit = document.getElementById('entryTypeToggle').checked;
+    const type = isCredit ? 'credit' : 'debit';
+    
     const amount = parseFloat(document.getElementById('amountInput').value);
 
     if (!accCode || isNaN(amount) || amount <= 0) {
@@ -262,7 +281,7 @@ function removeEntry(index) {
     renderJournalTable();
 }
 
-// --- MODAL FUNCTIONS (NASIL OYNANIR & BAŞARIMLAR) ---
+// --- MODAL FUNCTIONS ---
 function openHowToPlay() {
     const modal = document.getElementById('howToPlayModal');
     modal.classList.remove('hidden');
@@ -270,8 +289,7 @@ function openHowToPlay() {
 }
 
 function closeHowToPlay() {
-    const modal = document.getElementById('howToPlayModal');
-    modal.classList.add('hidden');
+    document.getElementById('howToPlayModal').classList.add('hidden');
 }
 
 function openAchievements() {
@@ -304,38 +322,110 @@ function closeAchievements() {
     document.getElementById('achievementsModal').classList.add('hidden');
 }
 
-// --- BAŞARIM SİSTEMİ MANTIĞI ---
+// --- LİDERLİK TABLOSU MODAL ---
+function openLeaderboard() {
+    const modal = document.getElementById('leaderboardModal');
+    const tbody = document.getElementById('leaderboardList');
+    const msg = document.getElementById('noScoreMsg');
+    
+    tbody.innerHTML = '';
+    const scores = Leaderboard.get();
+
+    if (scores.length === 0) {
+        msg.classList.remove('hidden');
+    } else {
+        msg.classList.add('hidden');
+        scores.forEach((item, index) => {
+            const tr = document.createElement('tr');
+            tr.className = index < 3 ? 'bg-slate-700/30' : 'border-b border-slate-700/50 hover:bg-slate-700/20';
+            
+            // Madalya ikonları
+            let rankIcon = `#${index + 1}`;
+            if(index === 0) rankIcon = '<i class="fa-solid fa-trophy text-yellow-500"></i>';
+            if(index === 1) rankIcon = '<i class="fa-solid fa-medal text-gray-400"></i>';
+            if(index === 2) rankIcon = '<i class="fa-solid fa-medal text-amber-700"></i>';
+
+            tr.innerHTML = `
+                <td class="px-6 py-4 font-bold text-slate-300">${rankIcon}</td>
+                <td class="px-6 py-4 font-medium text-white">
+                    ${item.name}
+                    <div class="text-xs text-slate-500 font-normal">${item.date || ''}</div>
+                </td>
+                <td class="px-6 py-4 text-right font-mono text-emerald-400 font-bold">${formatMoney(item.score).replace('₺', '')}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    modal.classList.remove('hidden');
+    modal.querySelector('div').classList.add('animate__zoomIn');
+}
+
+function closeLeaderboard() {
+    document.getElementById('leaderboardModal').classList.add('hidden');
+}
+
+
+// --- BAŞARIM SİSTEMİ MANTIĞI (GELİŞMİŞ) ---
 function checkAchievements() {
     const netIncome = calculateNetIncome();
+    const equity = calculateGroupTotal('equity') + netIncome;
+    const assetsFixed = calculateGroupTotal('assets_fixed');
     
+    // Hesap Bakiyelerine Erişim Helper
+    const getBal = (code) => {
+        const acc = GameState.accounts.find(a => a.code === code);
+        return acc ? acc.balance : 0;
+    };
+
     const unlock = (id) => {
         const ach = GameState.achievements.find(a => a.id === id);
         if (ach && !ach.unlocked) {
             ach.unlocked = true;
-            // Toast Notification
             Swal.fire({
-                toast: true,
-                position: 'bottom-end',
-                icon: 'success',
-                title: 'Başarım Kazanıldı!',
-                text: ach.title,
-                showConfirmButton: false,
-                timer: 3000,
-                background: '#1e293b',
-                color: '#fff'
+                toast: true, position: 'bottom-end', icon: 'success',
+                title: 'Başarım Kazanıldı!', text: ach.title,
+                showConfirmButton: false, timer: 3000,
+                background: '#1e293b', color: '#fff'
             });
         }
     };
 
-    // Kar Kontrolleri (Sadece bu tur için)
+    // 1. KARLILIK
     if (netIncome > 0) unlock('first_profit');
     if (netIncome > 10000) unlock('profit_10k');
     if (netIncome > 100000) unlock('profit_100k');
 
-    // Unvan Kontrolleri
+    // 2. UNVANLAR
     if (GameState.title === 'KOBİ' || GameState.title === 'A.Ş.' || GameState.title === 'Holding') unlock('title_kobi');
     if (GameState.title === 'A.Ş.' || GameState.title === 'Holding') unlock('title_corp');
     if (GameState.title === 'Holding') unlock('title_holding');
+
+    // 3. DAYANIKLILIK
+    if (GameState.turn >= 12) unlock('survivor_1y');
+    if (GameState.turn >= 36) unlock('survivor_3y');
+    if (GameState.turn >= 60) unlock('survivor_5y');
+
+    // 4. VARLIK YÖNETİMİ
+    if (getBal('100') >= 100000) unlock('cash_king');
+    if (getBal('102') >= 500000) unlock('bank_magnate');
+    if (getBal('254') >= 500000) unlock('fleet_owner');
+    if (getBal('153') >= 250000) unlock('inventory_master');
+
+    // 5. FİNANSAL YAPI
+    if (equity >= 2000000) unlock('equity_giant');
+    
+    const totalDebt = calculateGroupTotal('liab_short') + calculateGroupTotal('liab_long');
+    if (totalDebt === 0 && GameState.turn > 5) unlock('debt_free');
+
+    // 6. SKOR
+    if (GameState.score >= 5000) unlock('score_rookie');
+    if (GameState.score >= 25000) unlock('score_pro');
+    if (GameState.score >= 100000) unlock('score_legend');
+
+    // 7. DİĞER
+    if (getBal('360') === 0 && GameState.turn > 3) unlock('charity');
+    if (assetsFixed > calculateGroupTotal('assets_current') && assetsFixed > 0) unlock('investor');
 }
 
 
@@ -399,10 +489,10 @@ function saveTransaction() {
     if (cash + banks < -50000 && GameState.mode === 'career') {
         // İflas başarımını tetikle
         const ach = GameState.achievements.find(a => a.id === 'bankruptcy');
-        if(ach && !ach.unlocked) { 
-             ach.unlocked = true; 
-             // Toast gösterilmesine gerek yok, oyun bitiyor
-        }
+        if(ach && !ach.unlocked) { ach.unlocked = true; }
+
+        // Liderlik Tablosuna Kaydet
+        Leaderboard.save(GameState.companyName, GameState.score);
 
         Swal.fire('İFLAS!', 'Nakit akışını yönetemediniz. Şirket battı.', 'error').then(() => location.reload());
         return;
@@ -605,12 +695,16 @@ function nextTurn() {
     GameState.turn++;
     const saveBtn = document.getElementById('saveButton');
     saveBtn.classList.remove('success-locked');
+    saveBtn.disabled = true; // YENİ: Başlangıçta disable et
     saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk mr-2"></i> KONTROL ET & KAYDET';
 
     generateNewTurn();
     document.getElementById('nextTurnBtn').classList.add('hidden');
     document.querySelectorAll('input').forEach(i => i.value = '');
     
+    // Toggle reset
+    document.getElementById('entryTypeToggle').checked = false;
+
     if(GameState.difficulty === 'hard') {
          document.getElementById('balanceSheetContent').innerHTML = '<div class="text-sm text-slate-500 italic">Veri bekleniyor...</div>';
          document.getElementById('incomeStatementContent').innerHTML = '<div class="text-sm text-slate-500 italic">Veri bekleniyor...</div>';
@@ -634,3 +728,5 @@ window.openHowToPlay = openHowToPlay;
 window.closeHowToPlay = closeHowToPlay;
 window.openAchievements = openAchievements;
 window.closeAchievements = closeAchievements;
+window.openLeaderboard = openLeaderboard;
+window.closeLeaderboard = closeLeaderboard;

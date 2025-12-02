@@ -1,16 +1,45 @@
+
 /**
  * CFO Tycoon - Veri Yapıları ve Senaryo Motoru
  * Kaynak: Tek Düzen Hesap Planı
  */
 
 // Başarımlar Listesi
+// Başarımlar Listesi (Genişletilmiş - 22 Adet)
 const ACHIEVEMENTS = [
+    // --- KARLILIK ---
     { id: 'first_profit', title: 'İlk Kar', desc: 'Dönem net karı pozitif olan bir ayı tamamla.', icon: 'fa-seedling', unlocked: false },
     { id: 'profit_10k', title: 'Küçük Adımlar', desc: 'Bir ayda 10.000 TL üzeri net kar et.', icon: 'fa-coins', unlocked: false },
     { id: 'profit_100k', title: 'Para Basıyor', desc: 'Bir ayda 100.000 TL üzeri net kar et.', icon: 'fa-money-bill-wave', unlocked: false },
+    
+    // --- UNVANLAR ---
     { id: 'title_kobi', title: 'KOBİ Olduk!', desc: 'Şirketi KOBİ seviyesine yükselt (50k+ Özkaynak).', icon: 'fa-building', unlocked: false },
     { id: 'title_corp', title: 'Kurumsallaşma', desc: 'Şirketi A.Ş. seviyesine yükselt (250k+ Özkaynak).', icon: 'fa-city', unlocked: false },
     { id: 'title_holding', title: 'Zirve', desc: 'Şirketi Holding seviyesine yükselt (1M+ Özkaynak).', icon: 'fa-globe', unlocked: false },
+    
+    // --- DAYANIKLILIK (TUR SAYISI) ---
+    { id: 'survivor_1y', title: '1. Yıl Kutlaması', desc: 'İflas etmeden 12. ayı tamamla.', icon: 'fa-cake-candles', unlocked: false },
+    { id: 'survivor_3y', title: 'İstikrar Abidesi', desc: '36. ayı (3 Yıl) geride bırak.', icon: 'fa-calendar-check', unlocked: false },
+    { id: 'survivor_5y', title: 'Çınar Ağacı', desc: '60. ayı (5 Yıl) tamamla.', icon: 'fa-tree', unlocked: false },
+
+    // --- VARLIK YÖNETİMİ ---
+    { id: 'cash_king', title: 'Nakit Kralı', desc: 'Kasa hesabında (100) 100.000 TL biriktir.', icon: 'fa-sack-dollar', unlocked: false },
+    { id: 'bank_magnate', title: 'Banker', desc: 'Banka hesabında (102) 500.000 TL biriktir.', icon: 'fa-vault', unlocked: false },
+    { id: 'fleet_owner', title: 'Filo Sahibi', desc: 'Taşıtlar hesabını (254) 500.000 TL üzerine çıkar.', icon: 'fa-truck-fast', unlocked: false },
+    { id: 'inventory_master', title: 'Stokçu', desc: 'Depoda (153) 250.000 TL değerinde mal bulundur.', icon: 'fa-boxes-stacked', unlocked: false },
+    
+    // --- FİNANSAL YAPI ---
+    { id: 'equity_giant', title: 'Sermaye Devi', desc: 'Özkaynakları 2.000.000 TL üzerine çıkar.', icon: 'fa-mountain', unlocked: false },
+    { id: 'debt_free', title: 'Borçsuz Yaşam', desc: 'Hiçbir kısa veya uzun vadeli borcun kalmasın (Kredi, Satıcı vb. 0).', icon: 'fa-handshake-slash', unlocked: false },
+    
+    // --- SKOR ---
+    { id: 'score_rookie', title: 'Gelecek Vaat Ediyor', desc: 'Toplam 5.000 puana ulaş.', icon: 'fa-star-half-stroke', unlocked: false },
+    { id: 'score_pro', title: 'Profesyonel CFO', desc: 'Toplam 25.000 puana ulaş.', icon: 'fa-star', unlocked: false },
+    { id: 'score_legend', title: 'Efsane', desc: 'Toplam 100.000 puana ulaş.', icon: 'fa-crown', unlocked: false },
+    
+    // --- DİĞER ---
+    { id: 'charity', title: 'Vergisini Ödeyen', desc: 'Ödenecek vergi borçlarını (360) sıfırla.', icon: 'fa-file-invoice', unlocked: false },
+    { id: 'investor', title: 'Yatırımcı', desc: 'Duran varlık toplamı dönen varlıkları geçsin.', icon: 'fa-chart-line', unlocked: false },
     { id: 'bankruptcy', title: 'Dibe Vuruş', desc: 'Şirketi iflas ettir.', icon: 'fa-skull', unlocked: false }
 ];
 
