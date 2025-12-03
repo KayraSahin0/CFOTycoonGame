@@ -51,6 +51,21 @@ document.addEventListener('DOMContentLoaded', () => {
     document.head.appendChild(style);
 
     initApp();
+
+    // TUTAR INPUT FORMATLAMA (1.000.000 şeklinde)
+    const amountInput = document.getElementById('amountInput');
+    amountInput.addEventListener('input', function(e) {
+        // 1. Mevcut değerden rakam olmayan her şeyi temizle (noktaları sil)
+        let value = this.value.replace(/[^0-9]/g, '');
+        
+        // 2. Eğer değer varsa, binlik basamaklarına nokta koy
+        if (value) {
+            // Regex açıklaması: Her 3 basamakta bir nokta koy, ama sonuna koyma.
+            this.value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        } else {
+            this.value = "";
+        }
+    });
 });
 
 function initApp() {
@@ -176,7 +191,9 @@ function addToJournal() {
     const isCredit = document.getElementById('entryTypeToggle').checked;
     const type = isCredit ? 'credit' : 'debit';
     
-    const amount = parseFloat(document.getElementById('amountInput').value);
+    let rawAmount = document.getElementById('amountInput').value;
+    rawAmount = rawAmount.replace(/\./g, ''); // Tüm noktaları sil (1.000 -> 1000)
+    const amount = parseFloat(rawAmount);
 
     if (!accCode || isNaN(amount) || amount <= 0) {
         Swal.fire('Hata', 'Lütfen geçerli bir hesap ve tutar giriniz.', 'error');

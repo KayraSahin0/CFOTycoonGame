@@ -33,40 +33,50 @@
 <body class="h-auto md:h-screen overflow-y-auto md:overflow-hidden flex flex-col bg-slate-900 text-slate-200">
 
     <header class="bg-slate-950 border-b border-slate-800 p-3 shadow-lg z-10">
-        <div class="container mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <img src="./logopic/CFOTycoonLogo.png" alt="CFO Tycoon Logo" class="h-10 w-auto object-contain">
-                
-                <div class="hidden md:block">
-                    <h1 class="text-xl font-bold tracking-tight text-emerald-400 leading-none">CFO Tycoon</h1>
-                    <span id="companyNameDisplay" class="text-xs text-slate-500 font-mono"></span>
-                </div>
-                
-                <span id="titleBadge" class="bg-blue-900 text-blue-200 text-xs px-2 py-1 rounded-full ml-2 border border-blue-700">Startup</span>
+        <div class="container mx-auto flex flex-wrap md:flex-nowrap justify-between items-center gap-y-3">
+    
+    <div class="flex items-center gap-2 w-full md:w-auto justify-between md:justify-start">
+        <div class="flex items-center gap-2">
+            <img src="./logopic/CFOTycoonLogo.png" alt="CFO Tycoon Logo" class="h-8 md:h-10 w-auto object-contain">
+            
+            <div class="flex flex-col">
+                <h1 class="text-sm md:text-xl font-bold tracking-tight text-emerald-400 leading-none">CFO Tycoon</h1>
+                <span id="companyNameDisplay" class="text-[10px] md:text-xs text-slate-500 font-mono"></span>
             </div>
-            <div class="flex items-center gap-3">
-                <button onclick="openLeaderboard()" class="bg-slate-800 hover:bg-slate-700 text-purple-400 px-3 py-1.5 rounded border border-slate-700 transition" title="Liderlik Tablosu">
-                    <i class="fa-solid fa-chart-simple"></i>
-                </button>
+            
+            <span id="titleBadge" class="bg-blue-900 text-blue-200 text-[10px] md:text-xs px-2 py-0.5 rounded-full ml-1 border border-blue-700">Startup</span>
+        </div>
 
-                <button onclick="openAchievements()" class="bg-slate-800 hover:bg-slate-700 text-yellow-500 px-3 py-1.5 rounded border border-slate-700 transition" title="Başarımlar">
-                    <i class="fa-solid fa-trophy"></i>
-                </button>
+        </div>
 
-                <button onclick="openHowToPlay()" class="text-sm text-slate-400 hover:text-white transition flex items-center bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded border border-slate-700">
-                    <i class="fa-solid fa-circle-question mr-2"></i> <span class="hidden sm:inline">Nasıl Oynanır?</span>
-                </button>
-                
-                <div class="bg-slate-800 border border-slate-700 px-3 py-1.5 rounded text-sm text-yellow-400 font-bold flex items-center" title="Puan">
-                    <i class="fa-solid fa-star mr-2"></i> <span id="scoreBadge">0</span>
-                </div>
-                
-                <div class="bg-slate-800 border border-slate-700 px-3 py-1.5 rounded text-sm flex items-center">
-                    <i class="fa-regular fa-calendar text-slate-400 mr-2"></i>
-                    <span id="turnBadge">Ay: 1</span>
-                </div>
+    <div class="flex items-center gap-2 w-full md:w-auto justify-between md:justify-end border-t border-slate-800 pt-2 md:border-0 md:pt-0">
+        
+        <div class="flex items-center gap-2">
+            <button onclick="openLeaderboard()" class="bg-slate-800 hover:bg-slate-700 text-purple-400 w-8 h-8 md:w-auto md:h-auto md:px-3 md:py-1.5 rounded border border-slate-700 transition flex items-center justify-center" title="Liderlik Tablosu">
+                <i class="fa-solid fa-chart-simple"></i>
+            </button>
+
+            <button onclick="openAchievements()" class="bg-slate-800 hover:bg-slate-700 text-yellow-500 w-8 h-8 md:w-auto md:h-auto md:px-3 md:py-1.5 rounded border border-slate-700 transition flex items-center justify-center" title="Başarımlar">
+                <i class="fa-solid fa-trophy"></i>
+            </button>
+
+            <button onclick="openHowToPlay()" class="text-sm text-slate-400 hover:text-white transition flex items-center bg-slate-800 hover:bg-slate-700 w-8 h-8 md:w-auto md:h-auto md:px-3 md:py-1.5 rounded border border-slate-700 justify-center">
+                <i class="fa-solid fa-circle-question md:mr-2"></i> <span class="hidden md:inline">Nasıl Oynanır?</span>
+            </button>
+        </div>
+        
+        <div class="flex items-center gap-2">
+            <div class="bg-slate-800 border border-slate-700 px-2 py-1 md:px-3 md:py-1.5 rounded text-xs md:text-sm text-yellow-400 font-bold flex items-center" title="Puan">
+                <i class="fa-solid fa-star mr-1 md:mr-2"></i> <span id="scoreBadge">0</span>
+            </div>
+            
+            <div class="bg-slate-800 border border-slate-700 px-2 py-1 md:px-3 md:py-1.5 rounded text-xs md:text-sm flex items-center min-w-[60px] justify-center">
+                <i class="fa-regular fa-calendar text-slate-400 mr-1 md:mr-2"></i>
+                <span id="turnBadge">Ay: 1</span>
             </div>
         </div>
+    </div>
+</div>
     </header>
 
     <main class="flex-1 grid grid-cols-12 gap-0 md:overflow-hidden bg-slate-900 h-auto md:h-full">
@@ -108,7 +118,7 @@
 
                         <div class="col-span-1">
                             <label class="block text-xs text-slate-500 mb-1">Tutar</label>
-                            <input type="number" id="amountInput" class="w-full h-12 text-sm bg-slate-800 border border-slate-700 text-slate-200 rounded-md p-2 outline-none transition placeholder-slate-600 font-mono text-right text-lg" placeholder="0.00">
+                            <input type="text" inputmode="numeric" id="amountInput" class="w-full h-12 text-sm bg-slate-800 border border-slate-700 text-slate-200 rounded-md p-2 outline-none transition placeholder-slate-600 font-mono text-right text-lg" placeholder="0">
                         </div>
                     </div>
 
@@ -122,29 +132,29 @@
                         <span>Fiş Önizleme</span>
                         <span id="balanceIndicator" class="text-xs"></span>
                     </h3>
-                    <div class="overflow-x-auto bg-slate-800">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="text-xs text-slate-500 border-b border-slate-700">
-                                    <th class="p-2 pl-3">Kod</th>
-                                    <th class="p-2">Hesap</th>
-                                    <th class="p-2 text-right">Borç</th>
-                                    <th class="p-2 text-right">Alacak</th>
-                                    <th class="p-2"></th>
-                                </tr>
-                            </thead>
-                            <tbody id="journalTableBody" class="divide-y divide-slate-700">
-                                </tbody>
-                            <tfoot class="border-t border-slate-700 font-bold text-xs bg-slate-900/50 text-slate-400">
-                                <tr>
-                                    <td colspan="2" class="p-2 text-right">Toplam:</td>
-                                    <td class="p-2 text-right text-slate-300" id="totalDr">0.00</td>
-                                    <td class="p-2 text-right text-slate-300" id="totalCr">0.00</td>
-                                    <td></td>
-                                </tr>
-                            </tfoot>
-                        </table>
-                    </div>
+                    <div class="overflow-x-auto bg-slate-800 max-h-48 md:max-h-64 overflow-y-auto custom-scrollbar">
+    <table class="w-full text-left border-collapse relative">
+        <thead class="sticky top-0 bg-slate-900 shadow-sm z-10">
+            <tr class="text-xs text-slate-500 border-b border-slate-700">
+                <th class="p-2 pl-3">Kod</th>
+                <th class="p-2">Hesap</th>
+                <th class="p-2 text-right">Borç</th>
+                <th class="p-2 text-right">Alacak</th>
+                <th class="p-2"></th>
+            </tr>
+        </thead>
+        <tbody id="journalTableBody" class="divide-y divide-slate-700">
+            </tbody>
+        <tfoot class="border-t border-slate-700 font-bold text-xs bg-slate-900/90 text-slate-400 sticky bottom-0">
+            <tr>
+                <td colspan="2" class="p-2 text-right">Toplam:</td>
+                <td class="p-2 text-right text-slate-300" id="totalDr">0.00</td>
+                <td class="p-2 text-right text-slate-300" id="totalCr">0.00</td>
+                <td></td>
+            </tr>
+        </tfoot>
+    </table>
+</div>
                 </div>
             </div>
 

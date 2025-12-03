@@ -204,79 +204,79 @@ body {
     border: 1px solid #334155;
 }
 
-/* TOGGLE SWITCH (Borç / Alacak Seçimi) */
-.toggle-checkbox:checked {
-    right: 0;
-    border-color: #3b82f6; /* Blue-500 (Alacak) */
-}
-.toggle-checkbox:checked + .toggle-label {
-    background-color: #3b82f6; /* Blue-500 */
-}
-
-/* Toggle Container */
 .toggle-container {
     position: relative;
-    display: inline-block;
+    display: block;
     width: 100%;
-    height: 3rem; /* h-12 equivalent */
+    height: 3rem; /* h-12 */
+    user-select: none;
 }
 
-/* Hide default checkbox */
 .toggle-container input {
-    opacity: 0;
-    width: 0;
-    height: 0;
+    display: none; /* Default checkbox'ı gizle */
 }
 
-/* The track */
+/* Arka Plan (Pist) */
 .toggle-track {
     position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #1e293b; /* Slate-800 */
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #0f172a; /* Slate-900 - Daha koyu zemin */
     border: 1px solid #334155; /* Slate-700 */
-    transition: .4s;
-    border-radius: 0.375rem; /* rounded-md */
+    border-radius: 0.5rem; /* rounded-lg */
+    cursor: pointer;
+    transition: all 0.4s ease;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 1rem;
-    font-size: 0.875rem;
-    font-weight: 600;
+    padding: 0 0.5rem;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
 }
 
-/* Text labels inside track */
-.track-label-dr { color: #34d399; /* Emerald-400 */ opacity: 1; transition: opacity 0.3s;}
-.track-label-cr { color: #60a5fa; /* Blue-400 */ opacity: 0.5; transition: opacity 0.3s;}
+/* Yazılar (Labels) */
+.track-label-dr, .track-label-cr {
+    z-index: 2;
+    flex: 1;
+    text-align: center;
+    font-size: 0.75rem; /* text-xs */
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    transition: color 0.3s ease, opacity 0.3s ease;
+    line-height: 1; /* Dikey ortalama için önemli */
+    display: flex;       /* Flexbox ile tam ortalama */
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
 
-/* Checkbox checked state for labels */
-.toggle-container input:checked ~ .toggle-track .track-label-dr { opacity: 0.5; }
-.toggle-container input:checked ~ .toggle-track .track-label-cr { opacity: 1; }
+.track-label-dr { color: #10b981; /* Emerald-500 */ opacity: 1; }
+.track-label-cr { color: #64748b; /* Slate-500 */ opacity: 0.6; }
 
-/* The slider (knob) */
+/* Hareketli Parça (Slider) */
 .toggle-slider {
     position: absolute;
-    content: "";
-    height: 2.4rem;
-    width: 50%;
-    left: 0.3rem;
-    bottom: 0.25rem;
-    background-color: #334155; /* Slate-700 default */
-    transition: .4s;
-    border-radius: 0.25rem;
+    top: 4px; bottom: 4px; left: 4px;
+    width: calc(50% - 4px); /* Tam yarıdan biraz az */
+    background: linear-gradient(135deg, #334155, #1e293b); /* Hafif gradyan */
+    border-radius: 0.375rem; /* rounded-md */
+    transition: all 0.4s cubic-bezier(0.4, 0.0, 0.2, 1); /* Yumuşak geçiş */
     z-index: 1;
-    opacity: 0.3;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    border: 1px solid #475569;
 }
 
-/* Slider Move */
+/* --- CHECKED DURUMU (ALACAK) --- */
+/* Slider Sağa Kayar */
 .toggle-container input:checked ~ .toggle-slider {
-    transform: translateX(95%);
-    background-color: #1e3a8a; /* Blue-900 tint */
+    transform: translateX(100%);
+    background: linear-gradient(135deg, #1e3a8a, #172554); /* Mavi tonları */
+    border-color: #3b82f6;
+}
+/* Slider Sola Kayar (Borç - Default) */
+.toggle-container input:not(:checked) ~ .toggle-slider {
+    background: linear-gradient(135deg, #064e3b, #022c22); /* Yeşil tonları */
+    border-color: #10b981;
 }
 
-.toggle-container input:not(:checked) ~ .toggle-slider {
-    background-color: #064e3b; /* Emerald-900 tint */
-}
+/* Yazı Renk Değişimleri */
+.toggle-container input:checked ~ .toggle-track .track-label-dr { color: #64748b; opacity: 0.6; }
+.toggle-container input:checked ~ .toggle-track .track-label-cr { color: #3b82f6; opacity: 1; } /* Blue-500 */
