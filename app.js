@@ -22,9 +22,17 @@ const GameState = {
 // --- LEADERBOARD HELPER ---
 const Leaderboard = {
     key: 'cfo_tycoon_highscores_v1',
-    save: (name, score) => {
+    // Artık turn bilgisini de alıyor
+    save: (name, score, turn) => {
         let scores = Leaderboard.get();
-        scores.push({ name, score, date: new Date().toLocaleDateString('tr-TR') });
+        // formatTurnDate fonksiyonunu kullanarak "1y 3a" gibi formatlı kaydediyoruz
+        const turnStr = formatTurnDate(turn);
+        scores.push({ 
+            name, 
+            score, 
+            turnStr, 
+            date: new Date().toLocaleDateString('tr-TR') 
+        });
         scores.sort((a, b) => b.score - a.score);
         scores = scores.slice(0, 10); // İlk 10
         localStorage.setItem(Leaderboard.key, JSON.stringify(scores));
@@ -52,15 +60,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     initApp();
 
-    // TUTAR INPUT FORMATLAMA (1.000.000 şeklinde)
+    // TUTAR INPUT FORMATLAMA (Nokta koyma)
     const amountInput = document.getElementById('amountInput');
     amountInput.addEventListener('input', function(e) {
-        // 1. Mevcut değerden rakam olmayan her şeyi temizle (noktaları sil)
         let value = this.value.replace(/[^0-9]/g, '');
-        
-        // 2. Eğer değer varsa, binlik basamaklarına nokta koy
         if (value) {
-            // Regex açıklaması: Her 3 basamakta bir nokta koy, ama sonuna koyma.
             this.value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
         } else {
             this.value = "";
@@ -98,7 +102,6 @@ function startCareerSetup() {
     }).then(async (result) => {
         const diff = result.isDenied ? 'hard' : 'easy';
         
-        // Şirket İsmi Sorma Adımı
         const { value: companyName } = await Swal.fire({
             title: 'Şirketine İsim Ver',
             input: 'text',
@@ -108,9 +111,7 @@ function startCareerSetup() {
             confirmButtonText: 'Başla',
             cancelButtonText: 'Atla (Varsayılan)',
             inputValidator: (value) => {
-                if (value.length > 20) {
-                  return 'Şirket ismi çok uzun!';
-                }
+                if (value.length > 20) return 'Şirket ismi çok uzun!';
             }
         });
 
@@ -142,13 +143,10 @@ function startGame(mode, difficulty) {
     updateUI();
     generateNewTurn();
     
-    // Select doldur - Sıralı olsun
+    // Select doldur
     const accountSelect = document.getElementById('accountSelect');
     accountSelect.innerHTML = '<option value="">Hesap Seçin...</option>';
-    
-    // Hesapları koda göre sırala
     GameState.accounts.sort((a,b) => a.code.localeCompare(b.code));
-
     GameState.accounts.forEach(acc => {
         const option = document.createElement('option');
         option.value = acc.code;
@@ -171,7 +169,12 @@ function generateNewTurn() {
         else { GameState.title = "Startup"; GameState.multiplier = 1; }
     }
 
-    GameState.currentScenario = ScenarioEngine.generate(GameState.turn, GameState.multiplier, GameState.title);
+    // --- ZORUNLU BAŞLANGIÇ SENARYOSU (Turn 1 & Career) ---
+    if (GameState.turn === 1 && GameState.mode === 'career') {
+        GameState.currentScenario = ScenarioEngine.startupScenario;
+    } else {
+        GameState.currentScenario = ScenarioEngine.generate(GameState.turn, GameState.multiplier, GameState.title, GameState.accounts);
+    }
     
     // UI Güncelle
     document.getElementById('scenarioText').innerText = GameState.currentScenario.text;
@@ -191,8 +194,9 @@ function addToJournal() {
     const isCredit = document.getElementById('entryTypeToggle').checked;
     const type = isCredit ? 'credit' : 'debit';
     
+    // Noktaları temizle ve sayıya çevir
     let rawAmount = document.getElementById('amountInput').value;
-    rawAmount = rawAmount.replace(/\./g, ''); // Tüm noktaları sil (1.000 -> 1000)
+    rawAmount = rawAmount.replace(/\./g, '');
     const amount = parseFloat(rawAmount);
 
     if (!accCode || isNaN(amount) || amount <= 0) {
@@ -298,16 +302,13 @@ function removeEntry(index) {
     renderJournalTable();
 }
 
-// --- MODAL FUNCTIONS ---
+// --- MODAL & UI FUNCTIONS ---
 function openHowToPlay() {
     const modal = document.getElementById('howToPlayModal');
     modal.classList.remove('hidden');
     modal.querySelector('div').classList.add('animate__zoomIn');
 }
-
-function closeHowToPlay() {
-    document.getElementById('howToPlayModal').classList.add('hidden');
-}
+function closeHowToPlay() { document.getElementById('howToPlayModal').classList.add('hidden'); }
 
 function openAchievements() {
     const modal = document.getElementById('achievementsModal');
@@ -317,29 +318,18 @@ function openAchievements() {
     GameState.achievements.forEach(ach => {
         const item = document.createElement('div');
         item.className = `p-3 mb-2 rounded border flex items-center ${ach.unlocked ? 'bg-slate-800 border-yellow-600' : 'bg-slate-900 border-slate-700 opacity-60'}`;
-        
         item.innerHTML = `
-            <div class="text-2xl mr-4 ${ach.unlocked ? 'text-yellow-500' : 'text-slate-600'}">
-                <i class="fa-solid ${ach.icon}"></i>
-            </div>
-            <div>
-                <h4 class="font-bold ${ach.unlocked ? 'text-white' : 'text-slate-500'}">${ach.title}</h4>
-                <p class="text-xs text-slate-400">${ach.desc}</p>
-            </div>
+            <div class="text-2xl mr-4 ${ach.unlocked ? 'text-yellow-500' : 'text-slate-600'}"><i class="fa-solid ${ach.icon}"></i></div>
+            <div><h4 class="font-bold ${ach.unlocked ? 'text-white' : 'text-slate-500'}">${ach.title}</h4><p class="text-xs text-slate-400">${ach.desc}</p></div>
             ${ach.unlocked ? '<div class="ml-auto text-yellow-500"><i class="fa-solid fa-check"></i></div>' : ''}
         `;
         list.appendChild(item);
     });
-
     modal.classList.remove('hidden');
     modal.querySelector('div').classList.add('animate__zoomIn');
 }
+function closeAchievements() { document.getElementById('achievementsModal').classList.add('hidden'); }
 
-function closeAchievements() {
-    document.getElementById('achievementsModal').classList.add('hidden');
-}
-
-// --- LİDERLİK TABLOSU MODAL ---
 function openLeaderboard() {
     const modal = document.getElementById('leaderboardModal');
     const tbody = document.getElementById('leaderboardList');
@@ -356,17 +346,20 @@ function openLeaderboard() {
             const tr = document.createElement('tr');
             tr.className = index < 3 ? 'bg-slate-700/30' : 'border-b border-slate-700/50 hover:bg-slate-700/20';
             
-            // Madalya ikonları
             let rankIcon = `#${index + 1}`;
             if(index === 0) rankIcon = '<i class="fa-solid fa-trophy text-yellow-500"></i>';
             if(index === 1) rankIcon = '<i class="fa-solid fa-medal text-gray-400"></i>';
             if(index === 2) rankIcon = '<i class="fa-solid fa-medal text-amber-700"></i>';
 
+            // GÜNCELLENEN KISIM: item.turnStr eklendi
             tr.innerHTML = `
                 <td class="px-6 py-4 font-bold text-slate-300">${rankIcon}</td>
                 <td class="px-6 py-4 font-medium text-white">
                     ${item.name}
-                    <div class="text-xs text-slate-500 font-normal">${item.date || ''}</div>
+                    <div class="flex gap-2 text-xs text-slate-500 font-normal mt-0.5">
+                        <span><i class="fa-regular fa-calendar mr-1"></i>${item.date || ''}</span>
+                        <span class="text-blue-400">• ${item.turnStr || 'Yeni'}</span>
+                    </div>
                 </td>
                 <td class="px-6 py-4 text-right font-mono text-emerald-400 font-bold">${formatMoney(item.score).replace('₺', '')}</td>
             `;
@@ -377,145 +370,110 @@ function openLeaderboard() {
     modal.classList.remove('hidden');
     modal.querySelector('div').classList.add('animate__zoomIn');
 }
+function closeLeaderboard() { document.getElementById('leaderboardModal').classList.add('hidden'); }
 
-function closeLeaderboard() {
-    document.getElementById('leaderboardModal').classList.add('hidden');
+// --- AMORTİSMAN MODALI İŞLEMLERİ ---
+function openDepreciationModal() {
+    const modal = document.getElementById('depreciationModal');
+    modal.classList.remove('hidden');
+    document.getElementById('depResultDisplay').innerText = "0,00 ₺";
+    document.getElementById('depAssetValue').value = "";
+}
+function closeDepreciationModal() { document.getElementById('depreciationModal').classList.add('hidden'); }
+
+function calculateDepreciation() {
+    const value = parseFloat(document.getElementById('depAssetValue').value);
+    const life = parseFloat(document.getElementById('depLife').value);
+    const method = document.getElementById('depMethod').value;
+    if (!value || !life || life <= 0) { Swal.fire('Eksik Bilgi', 'Lütfen varlık değeri ve ömrünü giriniz.', 'warning'); return; }
+    let rate = 1 / life;
+    if (method === 'accelerated') rate *= 2; 
+    const result = Math.round(value * rate);
+    document.getElementById('depResultDisplay').innerText = formatMoney(result);
 }
 
-
-// --- BAŞARIM SİSTEMİ MANTIĞI (GELİŞMİŞ) ---
+// --- BAŞARIM SİSTEMİ ---
 function checkAchievements() {
     const netIncome = calculateNetIncome();
     const equity = calculateGroupTotal('equity') + netIncome;
     const assetsFixed = calculateGroupTotal('assets_fixed');
-    
-    // Hesap Bakiyelerine Erişim Helper
-    const getBal = (code) => {
-        const acc = GameState.accounts.find(a => a.code === code);
-        return acc ? acc.balance : 0;
-    };
-
+    const getBal = (code) => { const acc = GameState.accounts.find(a => a.code === code); return acc ? acc.balance : 0; };
     const unlock = (id) => {
         const ach = GameState.achievements.find(a => a.id === id);
         if (ach && !ach.unlocked) {
             ach.unlocked = true;
-            Swal.fire({
-                toast: true, position: 'bottom-end', icon: 'success',
-                title: 'Başarım Kazanıldı!', text: ach.title,
-                showConfirmButton: false, timer: 3000,
-                background: '#1e293b', color: '#fff'
-            });
+            Swal.fire({ toast: true, position: 'bottom-end', icon: 'success', title: 'Başarım Kazanıldı!', text: ach.title, showConfirmButton: false, timer: 3000, background: '#1e293b', color: '#fff' });
         }
     };
 
-    // 1. KARLILIK
     if (netIncome > 0) unlock('first_profit');
     if (netIncome > 10000) unlock('profit_10k');
     if (netIncome > 100000) unlock('profit_100k');
-
-    // 2. UNVANLAR
     if (GameState.title === 'KOBİ' || GameState.title === 'A.Ş.' || GameState.title === 'Holding') unlock('title_kobi');
     if (GameState.title === 'A.Ş.' || GameState.title === 'Holding') unlock('title_corp');
     if (GameState.title === 'Holding') unlock('title_holding');
-
-    // 3. DAYANIKLILIK
     if (GameState.turn >= 12) unlock('survivor_1y');
     if (GameState.turn >= 36) unlock('survivor_3y');
     if (GameState.turn >= 60) unlock('survivor_5y');
-
-    // 4. VARLIK YÖNETİMİ
     if (getBal('100') >= 100000) unlock('cash_king');
     if (getBal('102') >= 500000) unlock('bank_magnate');
     if (getBal('254') >= 500000) unlock('fleet_owner');
     if (getBal('153') >= 250000) unlock('inventory_master');
-
-    // 5. FİNANSAL YAPI
     if (equity >= 2000000) unlock('equity_giant');
-    
     const totalDebt = calculateGroupTotal('liab_short') + calculateGroupTotal('liab_long');
     if (totalDebt === 0 && GameState.turn > 5) unlock('debt_free');
-
-    // 6. SKOR
     if (GameState.score >= 5000) unlock('score_rookie');
     if (GameState.score >= 25000) unlock('score_pro');
     if (GameState.score >= 100000) unlock('score_legend');
-
-    // 7. DİĞER
     if (getBal('360') === 0 && GameState.turn > 3) unlock('charity');
     if (assetsFixed > calculateGroupTotal('assets_current') && assetsFixed > 0) unlock('investor');
 }
 
-
 // --- DOĞRULAMA VE KAYIT ---
-
 function saveTransaction() {
-    // 1. İÇERİK KONTROLÜ
     const validationResult = validateTransactionContent();
     if (!validationResult.isValid) {
-        Swal.fire({
-            title: 'Hatalı Kayıt',
-            html: `Yaptığınız kayıt senaryo ile uyuşmuyor.<br><br>
-                   <small class="text-slate-400">${validationResult.message}</small>`,
-            icon: 'error',
-            confirmButtonText: 'Tekrar Dene'
-        });
+        Swal.fire({ title: 'Hatalı Kayıt', html: `Yaptığınız kayıt senaryo ile uyuşmuyor.<br><br><small class="text-slate-400">${validationResult.message}</small>`, icon: 'error', confirmButtonText: 'Tekrar Dene' });
         return; 
     }
 
-    // 2. Skoru Güncelle ve BUTONU KİLİTLE
     if (!GameState.helpUsed) {
         GameState.score += 100 * GameState.multiplier;
         document.getElementById('scoreBadge').innerText = GameState.score;
-        
-        Swal.fire({
-            icon: 'success',
-            title: 'Doğru Kayıt!',
-            text: `+${100 * GameState.multiplier} Puan kazandınız.`,
-            timer: 1500,
-            showConfirmButton: false
-        });
+        Swal.fire({ icon: 'success', title: 'Doğru Kayıt!', text: `+${100 * GameState.multiplier} Puan kazandınız.`, timer: 1500, showConfirmButton: false });
     }
 
-    // BUTON KİLİTLEME
     const saveBtn = document.getElementById('saveButton');
     saveBtn.disabled = true;
     saveBtn.classList.add('success-locked');
     saveBtn.innerHTML = '<i class="fa-solid fa-check mr-2"></i> Kaydedildi';
 
-    // 3. Hesapları Güncelle (T-Cetvelleri)
     GameState.journalEntry.forEach(entry => {
         const acc = GameState.accounts.find(a => a.code === entry.code);
-        
         if (entry.type === 'debit') {
             acc.dr += entry.amount;
-            if (acc.type === 'A' || acc.type === 'X') acc.balance += entry.amount;
-            else acc.balance -= entry.amount;
+            if (acc.type === 'A' || acc.type === 'X') acc.balance += entry.amount; else acc.balance -= entry.amount;
         } else {
             acc.cr += entry.amount;
-            if (acc.type === 'L' || acc.type === 'E' || acc.type === 'I') acc.balance += entry.amount;
-            else acc.balance -= entry.amount;
+            if (acc.type === 'L' || acc.type === 'E' || acc.type === 'I') acc.balance += entry.amount; else acc.balance -= entry.amount;
         }
     });
 
-    // 4. BAŞARIM KONTROLÜ (İflastan önce)
     checkAchievements();
 
-    // 5. İflas Kontrolü
     const cash = GameState.accounts.find(a => a.code === '100').balance;
     const banks = GameState.accounts.find(a => a.code === '102').balance;
     if (cash + banks < -50000 && GameState.mode === 'career') {
-        // İflas başarımını tetikle
         const ach = GameState.achievements.find(a => a.id === 'bankruptcy');
         if(ach && !ach.unlocked) { ach.unlocked = true; }
 
-        // Liderlik Tablosuna Kaydet
-        Leaderboard.save(GameState.companyName, GameState.score);
+        // GÜNCELLEME: Turn bilgisini de gönderiyoruz
+        Leaderboard.save(GameState.companyName, GameState.score, GameState.turn);
 
         Swal.fire('İFLAS!', 'Nakit akışını yönetemediniz. Şirket battı.', 'error').then(() => location.reload());
         return;
     }
 
-    // 6. UI Güncelleme
     updateUI();
 
     if (GameState.difficulty === 'hard') {
@@ -525,13 +483,7 @@ function saveTransaction() {
              document.getElementById('nextTurnBtn').classList.remove('hidden');
              renderReports(false);
         } else {
-             if (!GameState.helpUsed) {
-                Swal.fire({
-                    toast: true, position: 'top-end', icon: 'success', 
-                    title: 'Defterler işlendi. Raporları doğrulayın.',
-                    showConfirmButton: false, timer: 3000
-                });
-            }
+             if (!GameState.helpUsed) Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Defterler işlendi. Raporları doğrulayın.', showConfirmButton: false, timer: 3000 });
             document.getElementById('validateReportsBtn').classList.remove('hidden');
             document.getElementById('nextTurnBtn').classList.add('hidden');
             renderReports(true); 
@@ -546,164 +498,81 @@ function saveTransaction() {
 function validateTransactionContent() {
     const userEntries = GameState.journalEntry;
     const correctEntries = GameState.currentScenario.correctEntries;
-
-    if (userEntries.length !== correctEntries.length) {
-        return { isValid: false, message: "Eksik veya fazla satır girdiniz." };
-    }
-
+    if (userEntries.length !== correctEntries.length) return { isValid: false, message: "Eksik veya fazla satır girdiniz." };
     const sortedUser = [...userEntries].sort((a, b) => a.code.localeCompare(b.code) || a.amount - b.amount);
     const sortedCorrect = [...correctEntries].sort((a, b) => a.code.localeCompare(b.code) || a.amount - b.amount);
-
     for (let i = 0; i < sortedCorrect.length; i++) {
-        const u = sortedUser[i];
-        const c = sortedCorrect[i];
-
-        if (u.code !== c.code) {
-            return { isValid: false, message: `Beklenen hesap: ${c.code}, Sizin girdiğiniz: ${u.code}` };
-        }
-        if (u.type !== c.type) {
-            return { isValid: false, message: `${u.code} hesabı ${c.type === 'debit' ? 'Borç' : 'Alacak'} çalışmalı.` };
-        }
-        if (Math.abs(u.amount - c.amount) > 1) {
-            return { isValid: false, message: `${u.code} hesabı için tutar hatalı. (Beklenen: ~${formatMoney(c.amount)})` };
-        }
+        const u = sortedUser[i]; const c = sortedCorrect[i];
+        if (u.code !== c.code) return { isValid: false, message: `Beklenen hesap: ${c.code}, Sizin girdiğiniz: ${u.code}` };
+        if (u.type !== c.type) return { isValid: false, message: `${u.code} hesabı ${c.type === 'debit' ? 'Borç' : 'Alacak'} çalışmalı.` };
+        if (Math.abs(u.amount - c.amount) > 1) return { isValid: false, message: `${u.code} hesabı için tutar hatalı.` };
     }
-
     return { isValid: true };
 }
 
-// --- REPORTING & VALIDATION ---
-
-function calculateGroupTotal(groupName) {
-    return GameState.accounts
-        .filter(a => a.group === groupName)
-        .reduce((sum, acc) => sum + acc.balance, 0);
-}
-
-function calculateNetIncome() {
-    const income = calculateGroupTotal('income');
-    const expense = calculateGroupTotal('expense');
-    return income - expense;
-}
+// --- REPORTING ---
+function calculateGroupTotal(groupName) { return GameState.accounts.filter(a => a.group === groupName).reduce((sum, acc) => sum + acc.balance, 0); }
+function calculateNetIncome() { return calculateGroupTotal('income') - calculateGroupTotal('expense'); }
 
 function renderReports(isInputMode) {
     const createRow = (label, value) => {
-        let valHtml = '';
-        if (isInputMode) {
-            valHtml = `<input type="number" class="hard-mode-input" data-target="${Math.round(value)}" placeholder="?">`;
-        } else {
-            valHtml = `<span class="report-value ${value < 0 ? 'text-red-400' : 'text-emerald-400'}">${formatMoney(value)}</span>`;
-        }
-        return `
-            <div class="report-row">
-                <span class="report-label">${label}</span>
-                ${valHtml}
-            </div>
-        `;
+        let valHtml = isInputMode ? `<input type="number" class="hard-mode-input" data-target="${Math.round(value)}" placeholder="?">` : `<span class="report-value ${value < 0 ? 'text-red-400' : 'text-emerald-400'}">${formatMoney(value)}</span>`;
+        return `<div class="report-row"><span class="report-label">${label}</span>${valHtml}</div>`;
     };
 
-    // --- Bilanço ---
     const currentAssets = calculateGroupTotal('assets_current');
     const fixedAssets = calculateGroupTotal('assets_fixed');
     const totalAssets = currentAssets + fixedAssets;
-
     const shortLiab = calculateGroupTotal('liab_short');
     const longLiab = calculateGroupTotal('liab_long');
     const equity = calculateGroupTotal('equity');
     const netIncome = calculateNetIncome(); 
     const totalLiabEquity = shortLiab + longLiab + equity + netIncome;
 
-    let balanceSheetHTML = '';
-    balanceSheetHTML += createRow('Dönen Varlıklar', currentAssets);
-    balanceSheetHTML += createRow('Duran Varlıklar', fixedAssets);
-    balanceSheetHTML += `<div class="report-total"><span>TOPLAM VARLIKLAR</span><span>${isInputMode ? '---' : formatMoney(totalAssets)}</span></div>`;
-    
-    balanceSheetHTML += '<div class="h-6"></div>'; 
-    
-    balanceSheetHTML += createRow('Kısa Vadeli Y.K.', shortLiab);
-    balanceSheetHTML += createRow('Uzun Vadeli Y.K.', longLiab);
-    balanceSheetHTML += createRow('Özkaynaklar', equity);
-    balanceSheetHTML += createRow('Dönem Net Karı', netIncome);
-    balanceSheetHTML += `<div class="report-total"><span>TOPLAM KAYNAKLAR</span><span>${isInputMode ? '---' : formatMoney(totalLiabEquity)}</span></div>`;
+    let bs = createRow('Dönen Varlıklar', currentAssets) + createRow('Duran Varlıklar', fixedAssets) + `<div class="report-total"><span>TOPLAM VARLIKLAR</span><span>${isInputMode ? '---' : formatMoney(totalAssets)}</span></div><div class="h-6"></div>`; 
+    bs += createRow('Kısa Vadeli Y.K.', shortLiab) + createRow('Uzun Vadeli Y.K.', longLiab) + createRow('Özkaynaklar', equity) + createRow('Dönem Net Karı', netIncome) + `<div class="report-total"><span>TOPLAM KAYNAKLAR</span><span>${isInputMode ? '---' : formatMoney(totalLiabEquity)}</span></div>`;
+    document.getElementById('balanceSheetContent').innerHTML = bs;
 
-    document.getElementById('balanceSheetContent').innerHTML = balanceSheetHTML;
-
-    // --- Gelir Tablosu ---
     const grossSales = calculateGroupTotal('income');
     const expenses = calculateGroupTotal('expense');
-    
-    let incomeStatementHTML = '';
-    incomeStatementHTML += createRow('Brüt Satışlar', grossSales);
-    incomeStatementHTML += createRow('Giderler (-)', expenses); 
-    incomeStatementHTML += `<div class="report-total !text-emerald-400 !border-emerald-900/50"><span>NET KAR/ZARAR</span><span>${isInputMode ? '---' : formatMoney(netIncome)}</span></div>`;
-
-    document.getElementById('incomeStatementContent').innerHTML = incomeStatementHTML;
+    let isHtml = createRow('Brüt Satışlar', grossSales) + createRow('Giderler (-)', expenses) + `<div class="report-total !text-emerald-400 !border-emerald-900/50"><span>NET KAR/ZARAR</span><span>${isInputMode ? '---' : formatMoney(netIncome)}</span></div>`;
+    document.getElementById('incomeStatementContent').innerHTML = isHtml;
 }
 
 function validateHardMode() {
     const inputs = document.querySelectorAll('.hard-mode-input');
     let allCorrect = true;
-
     inputs.forEach(input => {
-        const userVal = parseFloat(input.value);
-        const targetVal = parseFloat(input.getAttribute('data-target'));
+        const userVal = parseFloat(input.value); const targetVal = parseFloat(input.getAttribute('data-target'));
         const tolerance = Math.abs(targetVal * 0.01) + 1; 
-        
-        if (!isNaN(userVal) && Math.abs(userVal - targetVal) <= tolerance) {
-            input.classList.remove('error');
-            input.classList.add('success');
-            input.disabled = true; 
-        } else {
-            input.classList.add('error');
-            allCorrect = false;
-        }
+        if (!isNaN(userVal) && Math.abs(userVal - targetVal) <= tolerance) { input.classList.remove('error'); input.classList.add('success'); input.disabled = true; } 
+        else { input.classList.add('error'); allCorrect = false; }
     });
-
     if (allCorrect) {
         Swal.fire('Tebrikler CFO!', 'Mali tablolar doğrulandı. Bir sonraki aya geçiliyor.', 'success');
         document.getElementById('validateReportsBtn').classList.add('hidden');
         document.getElementById('nextTurnBtn').classList.remove('hidden');
-    } else {
-        Swal.fire('Hata', 'Hesaplamalarda yanlışlık var. T-Cetvellerini kontrol edip tekrar dene.', 'error');
-    }
+    } else { Swal.fire('Hata', 'Hesaplamalarda yanlışlık var.', 'error'); }
 }
 
 // --- HELPERS ---
-
-function updateUI() {
-    renderLedger();
-}
+function updateUI() { renderLedger(); }
 
 function renderLedger() {
     const container = document.getElementById('ledgerContainer');
     container.innerHTML = '';
-
     const activeAccounts = GameState.accounts.filter(a => a.dr > 0 || a.cr > 0 || a.balance !== 0);
-
-    if(activeAccounts.length === 0) {
-        container.innerHTML = '<div class="text-slate-500 text-center w-full mt-10 italic">Henüz kayıt yok.</div>';
-        return;
-    }
+    if(activeAccounts.length === 0) { container.innerHTML = '<div class="text-slate-500 text-center w-full mt-10 italic">Henüz kayıt yok.</div>'; return; }
 
     activeAccounts.forEach(acc => {
         const div = document.createElement('div');
         div.className = "t-account-card masonry-item animate__animated animate__fadeIn";
-        
         const balanceColor = acc.balance < 0 ? 'text-red-400' : 'text-emerald-400';
-
         div.innerHTML = `
-            <div class="t-account">
-                <div class="t-header">${acc.code} - ${acc.name}</div>
-                <div class="t-body">
-                    <div class="t-debit">${acc.dr > 0 ? formatMoney(acc.dr) : '-'}</div>
-                    <div class="t-credit">${acc.cr > 0 ? formatMoney(acc.cr) : '-'}</div>
-                </div>
-                <div class="t-footer ${balanceColor}">
-                    <span>Bakiye:</span>
-                    <span>${formatMoney(acc.balance)}</span>
-                </div>
-            </div>
-        `;
+            <div class="t-account"><div class="t-header">${acc.code} - ${acc.name}</div>
+                <div class="t-body"><div class="t-debit">${acc.dr > 0 ? formatMoney(acc.dr) : '-'}</div><div class="t-credit">${acc.cr > 0 ? formatMoney(acc.cr) : '-'}</div></div>
+                <div class="t-footer ${balanceColor}"><span>Bakiye:</span><span>${formatMoney(acc.balance)}</span></div>
+            </div>`;
         container.appendChild(div);
     });
 }
@@ -712,52 +581,76 @@ function nextTurn() {
     GameState.turn++;
     const saveBtn = document.getElementById('saveButton');
     saveBtn.classList.remove('success-locked');
-    saveBtn.disabled = true; // YENİ: Başlangıçta disable et
+    saveBtn.disabled = true; 
     saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk mr-2"></i> KONTROL ET & KAYDET';
 
     generateNewTurn();
     document.getElementById('nextTurnBtn').classList.add('hidden');
     document.querySelectorAll('input').forEach(i => i.value = '');
-    
-    // Toggle reset
     document.getElementById('entryTypeToggle').checked = false;
 
     if(GameState.difficulty === 'hard') {
          document.getElementById('balanceSheetContent').innerHTML = '<div class="text-sm text-slate-500 italic">Veri bekleniyor...</div>';
          document.getElementById('incomeStatementContent').innerHTML = '<div class="text-sm text-slate-500 italic">Veri bekleniyor...</div>';
-    } else {
-         renderReports(false);
-    }
+    } else { renderReports(false); }
 }
 
-function formatMoney(amount) {
-    return new Intl.NumberFormat('tr-TR', { 
-        style: 'currency', 
-        currency: 'TRY',
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2 
-    }).format(amount);
-}
+function formatMoney(amount) { return new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY', minimumFractionDigits: 2 }).format(amount); }
 
 function formatTurnDate(turn) {
-    // 12. aydan sonra (yani 13. tur ve sonrası) yıl formatına geç
-    if (turn <= 12) {
-        return `Ay: ${turn}`;
-    } else {
-        const years = Math.floor(turn / 12);
-        const months = turn % 12;
-        
-        // Örn: 12. ay bitti, 13. tur => 1y 1a
-        // Eğer tam 24. tur ise (24/12 = 2, kalan 0) => 2y 0a yerine 1y 12a mı yoksa 2y mu?
-        // Senin istediğin "15. aydaysak 1y3a" mantığına göre:
-        // 15 / 12 = 1 (Yıl), kalan 3 (Ay).
-        
-        // Eğer kalan 0 ise (örn: 24. ay), bu "2. Yılın sonu" demek ama 
-        // gösterim olarak "2y 0a" yerine direkt "2. Yıl" veya "1y 12a" denebilir.
-        // Senin formatına sadık kalarak:
-        return `${years}Y ${months}A`;
-    }
+    if (turn <= 12) return `Ay: ${turn}`;
+    const years = Math.floor(turn / 12);
+    const months = turn % 12;
+    return `${years}y ${months}a`;
 }
+
+function switchHelpTab(tabName) {
+    document.getElementById('tabContent-gameplay').classList.add('hidden');
+    document.getElementById('tabContent-financials').classList.add('hidden');
+    const inactiveClass = "flex-1 py-3 text-sm font-bold text-slate-500 border-b-2 border-transparent hover:text-slate-300 transition hover:bg-slate-800/30";
+    document.getElementById('tabBtn-gameplay').className = inactiveClass;
+    document.getElementById('tabBtn-financials').className = inactiveClass;
+    document.getElementById('tabContent-' + tabName).classList.remove('hidden');
+    const activeClass = "flex-1 py-3 text-sm font-bold text-emerald-400 border-b-2 border-emerald-400 transition bg-slate-800/50";
+    document.getElementById('tabBtn-' + tabName).className = activeClass;
+}
+
+// --- OYUNU BİTİRME ---
+function finishGame() {
+    Swal.fire({
+        title: 'Şirketi Kapatıyor musun?',
+        html: `Mevcut Puanın: <strong class="text-emerald-400">${formatMoney(GameState.score)}</strong><br>
+               Süre: <strong class="text-blue-400">${formatTurnDate(GameState.turn)}</strong><br><br>
+               Bu işlem oyunu sonlandırır ve skorunu liderlik tablosuna kaydeder.`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Evet, Kapat ve Kaydet',
+        cancelButtonText: 'İptal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Skoru Kaydet
+            Leaderboard.save(GameState.companyName, GameState.score, GameState.turn);
+            
+            // Başarılı Mesajı ve Reload
+            Swal.fire({
+                title: 'Oyun Bitti!',
+                text: 'Skorunuz başarıyla kaydedildi.',
+                icon: 'success',
+                confirmButtonText: 'Liderlik Tablosunu Gör'
+            }).then(() => {
+                // Liderlik tablosunu açıp sayfayı yenilemek yerine,
+                // direkt sayfayı yenileyip temiz bir başlangıç sunabiliriz 
+                // ya da sadece tabloyu açabiliriz. Genelde oyun bittiği için reload iyidir.
+                location.reload();
+            });
+        }
+    });
+}
+
+// Global'e ekle
+window.finishGame = finishGame;
 
 // Global functions
 window.addToJournal = addToJournal;
@@ -772,3 +665,7 @@ window.openAchievements = openAchievements;
 window.closeAchievements = closeAchievements;
 window.openLeaderboard = openLeaderboard;
 window.closeLeaderboard = closeLeaderboard;
+window.openDepreciationModal = openDepreciationModal;
+window.closeDepreciationModal = closeDepreciationModal;
+window.calculateDepreciation = calculateDepreciation;
+window.switchHelpTab = switchHelpTab;

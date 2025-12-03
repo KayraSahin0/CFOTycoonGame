@@ -34,49 +34,56 @@
 
     <header class="bg-slate-950 border-b border-slate-800 p-3 shadow-lg z-10">
         <div class="container mx-auto flex flex-wrap md:flex-nowrap justify-between items-center gap-y-3">
-    
-    <div class="flex items-center gap-2 w-full md:w-auto justify-between md:justify-start">
-        <div class="flex items-center gap-2">
-            <img src="./logopic/CFOTycoonLogo.png" alt="CFO Tycoon Logo" class="h-8 md:h-10 w-auto object-contain">
             
-            <div class="flex flex-col">
-                <h1 class="text-sm md:text-xl font-bold tracking-tight text-emerald-400 leading-none">CFO Tycoon</h1>
-                <span id="companyNameDisplay" class="text-[10px] md:text-xs text-slate-500 font-mono"></span>
+            <div class="flex items-center gap-2 w-full md:w-auto justify-between md:justify-start">
+                <div class="flex items-center gap-2">
+                    <img src="./logopic/CFOTycoonLogo.png" alt="CFO Tycoon Logo" class="h-8 md:h-10 w-auto object-contain">
+                    
+                    <div class="flex flex-col">
+                        <h1 class="text-sm md:text-xl font-bold tracking-tight text-emerald-400 leading-none">CFO Tycoon</h1>
+                        <span id="companyNameDisplay" class="text-[10px] md:text-xs text-slate-500 font-mono"></span>
+                    </div>
+                    
+                    <span id="titleBadge" class="bg-blue-900 text-blue-200 text-[10px] md:text-xs px-2 py-0.5 rounded-full ml-1 border border-blue-700">Startup</span>
+                </div>
             </div>
-            
-            <span id="titleBadge" class="bg-blue-900 text-blue-200 text-[10px] md:text-xs px-2 py-0.5 rounded-full ml-1 border border-blue-700">Startup</span>
-        </div>
-
-        </div>
-
-    <div class="flex items-center gap-2 w-full md:w-auto justify-between md:justify-end border-t border-slate-800 pt-2 md:border-0 md:pt-0">
         
-        <div class="flex items-center gap-2">
-            <button onclick="openLeaderboard()" class="bg-slate-800 hover:bg-slate-700 text-purple-400 w-8 h-8 md:w-auto md:h-auto md:px-3 md:py-1.5 rounded border border-slate-700 transition flex items-center justify-center" title="Liderlik Tablosu">
-                <i class="fa-solid fa-chart-simple"></i>
-            </button>
+            <div class="flex items-center gap-2 w-full md:w-auto justify-between md:justify-end border-t border-slate-800 pt-2 md:border-0 md:pt-0">
+                
+                <div class="flex items-center gap-2">
+                    <button onclick="openDepreciationModal()" class="bg-slate-800 hover:bg-slate-700 text-orange-400 w-8 h-8 md:w-auto md:h-auto md:px-3 md:py-1.5 rounded border border-slate-700 transition flex items-center justify-center" title="Amortisman Tablosu">
+                        <i class="fa-solid fa-calculator md:mr-2"></i> <span class="hidden md:inline">Amortisman</span>
+                    </button>
 
-            <button onclick="openAchievements()" class="bg-slate-800 hover:bg-slate-700 text-yellow-500 w-8 h-8 md:w-auto md:h-auto md:px-3 md:py-1.5 rounded border border-slate-700 transition flex items-center justify-center" title="Başarımlar">
-                <i class="fa-solid fa-trophy"></i>
-            </button>
+                    <button onclick="finishGame()" class="bg-red-900/30 hover:bg-red-800/50 text-red-400 w-8 h-8 md:w-auto md:h-auto md:px-3 md:py-1.5 rounded border border-red-800/50 transition flex items-center justify-center mr-2" title="Şirketi Kapat ve Kaydet">
+                        <i class="fa-solid fa-power-off md:mr-2"></i> <span class="hidden md:inline">Şirketi Kapat</span>
+                    </button>
 
-            <button onclick="openHowToPlay()" class="text-sm text-slate-400 hover:text-white transition flex items-center bg-slate-800 hover:bg-slate-700 w-8 h-8 md:w-auto md:h-auto md:px-3 md:py-1.5 rounded border border-slate-700 justify-center">
-                <i class="fa-solid fa-circle-question md:mr-2"></i> <span class="hidden md:inline">Nasıl Oynanır?</span>
-            </button>
-        </div>
+                    <button onclick="openLeaderboard()" class="bg-slate-800 hover:bg-slate-700 text-purple-400 w-8 h-8 md:w-auto md:h-auto md:px-3 md:py-1.5 rounded border border-slate-700 transition flex items-center justify-center" title="Liderlik Tablosu">
+                        <i class="fa-solid fa-chart-simple"></i>
+                    </button>
         
-        <div class="flex items-center gap-2">
-            <div class="bg-slate-800 border border-slate-700 px-2 py-1 md:px-3 md:py-1.5 rounded text-xs md:text-sm text-yellow-400 font-bold flex items-center" title="Puan">
-                <i class="fa-solid fa-star mr-1 md:mr-2"></i> <span id="scoreBadge">0</span>
-            </div>
-            
-            <div class="bg-slate-800 border border-slate-700 px-2 py-1 md:px-3 md:py-1.5 rounded text-xs md:text-sm flex items-center min-w-[60px] justify-center">
-                <i class="fa-regular fa-calendar text-slate-400 mr-1 md:mr-2"></i>
-                <span id="turnBadge">Ay: 1</span>
+                    <button onclick="openAchievements()" class="bg-slate-800 hover:bg-slate-700 text-yellow-500 w-8 h-8 md:w-auto md:h-auto md:px-3 md:py-1.5 rounded border border-slate-700 transition flex items-center justify-center" title="Başarımlar">
+                        <i class="fa-solid fa-trophy"></i>
+                    </button>
+        
+                    <button onclick="openHowToPlay()" class="text-sm text-slate-400 hover:text-white transition flex items-center bg-slate-800 hover:bg-slate-700 w-8 h-8 md:w-auto md:h-auto md:px-3 md:py-1.5 rounded border border-slate-700 justify-center">
+                        <i class="fa-solid fa-circle-question md:mr-2"></i> <span class="hidden md:inline">Nasıl Oynanır?</span>
+                    </button>
+                </div>
+                
+                <div class="flex items-center gap-2">
+                    <div class="bg-slate-800 border border-slate-700 px-2 py-1 md:px-3 md:py-1.5 rounded text-xs md:text-sm text-yellow-400 font-bold flex items-center" title="Puan">
+                        <i class="fa-solid fa-star mr-1 md:mr-2"></i> <span id="scoreBadge">0</span>
+                    </div>
+                    
+                    <div class="bg-slate-800 border border-slate-700 px-2 py-1 md:px-3 md:py-1.5 rounded text-xs md:text-sm flex items-center min-w-[60px] justify-center">
+                        <i class="fa-regular fa-calendar text-slate-400 mr-1 md:mr-2"></i>
+                        <span id="turnBadge">Ay: 1</span>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-</div>
     </header>
 
     <main class="flex-1 grid grid-cols-12 gap-0 md:overflow-hidden bg-slate-900 h-auto md:h-full">
@@ -132,29 +139,30 @@
                         <span>Fiş Önizleme</span>
                         <span id="balanceIndicator" class="text-xs"></span>
                     </h3>
+                    
                     <div class="overflow-x-auto bg-slate-800 max-h-48 md:max-h-64 overflow-y-auto custom-scrollbar">
-    <table class="w-full text-left border-collapse relative">
-        <thead class="sticky top-0 bg-slate-900 shadow-sm z-10">
-            <tr class="text-xs text-slate-500 border-b border-slate-700">
-                <th class="p-2 pl-3">Kod</th>
-                <th class="p-2">Hesap</th>
-                <th class="p-2 text-right">Borç</th>
-                <th class="p-2 text-right">Alacak</th>
-                <th class="p-2"></th>
-            </tr>
-        </thead>
-        <tbody id="journalTableBody" class="divide-y divide-slate-700">
-            </tbody>
-        <tfoot class="border-t border-slate-700 font-bold text-xs bg-slate-900/90 text-slate-400 sticky bottom-0">
-            <tr>
-                <td colspan="2" class="p-2 text-right">Toplam:</td>
-                <td class="p-2 text-right text-slate-300" id="totalDr">0.00</td>
-                <td class="p-2 text-right text-slate-300" id="totalCr">0.00</td>
-                <td></td>
-            </tr>
-        </tfoot>
-    </table>
-</div>
+                        <table class="w-full text-left border-collapse relative">
+                            <thead class="sticky top-0 bg-slate-900 shadow-sm z-10">
+                                <tr class="text-xs text-slate-500 border-b border-slate-700">
+                                    <th class="p-2 pl-3">Kod</th>
+                                    <th class="p-2">Hesap</th>
+                                    <th class="p-2 text-right">Borç</th>
+                                    <th class="p-2 text-right">Alacak</th>
+                                    <th class="p-2"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="journalTableBody" class="divide-y divide-slate-700">
+                                </tbody>
+                            <tfoot class="border-t border-slate-700 font-bold text-xs bg-slate-900/90 text-slate-400 sticky bottom-0">
+                                <tr>
+                                    <td colspan="2" class="p-2 text-right">Toplam:</td>
+                                    <td class="p-2 text-right text-slate-300" id="totalDr">0.00</td>
+                                    <td class="p-2 text-right text-slate-300" id="totalCr">0.00</td>
+                                    <td></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
                 </div>
             </div>
 
@@ -223,53 +231,119 @@
 
     <div id="howToPlayModal" class="fixed inset-0 bg-slate-900/80 z-50 hidden flex items-center justify-center backdrop-blur-sm">
         <div class="bg-slate-800 w-full max-w-3xl rounded-xl border border-slate-700 shadow-2xl overflow-hidden animate__animated animate__zoomIn">
+            
             <div class="p-4 bg-slate-900 border-b border-slate-700 flex justify-between items-center">
-                <h3 class="text-lg font-bold text-white"><i class="fa-solid fa-circle-question mr-2 text-emerald-400"></i>Nasıl Oynanır?</h3>
+                <h3 class="text-lg font-bold text-white"><i class="fa-solid fa-graduation-cap mr-2 text-emerald-400"></i>CFO Akademi</h3>
                 <button onclick="closeHowToPlay()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
-            <div class="p-6 text-slate-300 text-sm space-y-4 max-h-[70vh] overflow-y-auto custom-scrollbar">
+
+            <div class="flex border-b border-slate-700 bg-slate-950/30">
+                <button onclick="switchHelpTab('gameplay')" id="tabBtn-gameplay" class="flex-1 py-3 text-sm font-bold text-emerald-400 border-b-2 border-emerald-400 transition bg-slate-800/50">
+                    <i class="fa-solid fa-gamepad mr-2"></i>Oyun Rehberi
+                </button>
+                <button onclick="switchHelpTab('financials')" id="tabBtn-financials" class="flex-1 py-3 text-sm font-bold text-slate-500 border-b-2 border-transparent hover:text-slate-300 transition hover:bg-slate-800/30">
+                    <i class="fa-solid fa-file-invoice-dollar mr-2"></i>Mali Tablolar
+                </button>
+            </div>
+
+            <div class="p-6 text-slate-300 text-sm space-y-4 max-h-[60vh] overflow-y-auto custom-scrollbar bg-slate-900/50">
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <h4 class="text-emerald-400 font-bold border-b border-slate-700 pb-1 mb-2">1. Temel Mantık</h4>
-                        <p class="mb-2">Muhasebede her işlem çift taraflıdır. Toplam <b>BORÇ</b> ve toplam <b>ALACAK</b> birbirine eşit olmalıdır.</p>
-                        <ul class="list-disc pl-5 space-y-1 text-slate-400 text-xs">
-                            <li><b class="text-blue-300">Varlıklar (100-299):</b> Artışlar BORÇ, Azalışlar ALACAK.</li>
-                            <li><b class="text-purple-300">Kaynaklar (300-599):</b> Artışlar ALACAK, Azalışlar BORÇ.</li>
-                            <li><b class="text-red-300">Giderler (700+):</b> Genelde BORÇ çalışır.</li>
-                            <li><b class="text-green-300">Gelirler (600+):</b> Genelde ALACAK çalışır.</li>
-                        </ul>
+                <div id="tabContent-gameplay" class="animate__animated animate__fadeIn">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="text-emerald-400 font-bold border-b border-slate-700 pb-1 mb-2">1. Temel Mantık</h4>
+                            <p class="mb-2">Muhasebede her işlem çift taraflıdır. Toplam <b>BORÇ</b> ve toplam <b>ALACAK</b> birbirine eşit olmalıdır.</p>
+                            <ul class="list-disc pl-5 space-y-1 text-slate-400 text-xs">
+                                <li><b class="text-blue-300">Varlıklar (100-299):</b> Artışlar BORÇ, Azalışlar ALACAK.</li>
+                                <li><b class="text-purple-300">Kaynaklar (300-599):</b> Artışlar ALACAK, Azalışlar BORÇ.</li>
+                                <li><b class="text-red-300">Giderler (700+):</b> Genelde BORÇ çalışır.</li>
+                                <li><b class="text-green-300">Gelirler (600+):</b> Genelde ALACAK çalışır.</li>
+                            </ul>
+                        </div>
+
+                        <div>
+                            <h4 class="text-yellow-400 font-bold border-b border-slate-700 pb-1 mb-2">2. Kariyer Basamakları</h4>
+                            <p class="mb-2">Kariyer modunda <b>Özkaynaklarınız</b> (Sermaye + Kar) arttıkça unvanınız ve puan katsayınız artar.</p>
+                            <table class="w-full text-xs text-left text-slate-400">
+                                <thead class="text-slate-200 bg-slate-700">
+                                    <tr><th class="p-1">Unvan</th><th class="p-1">Gereken Özkaynak</th><th class="p-1 text-right">Çarpan</th></tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-700 border border-slate-700">
+                                    <tr><td class="p-1">Startup</td><td class="p-1">0 - 50k</td><td class="p-1 text-right">x1</td></tr>
+                                    <tr><td class="p-1">KOBİ</td><td class="p-1">50k+</td><td class="p-1 text-right">x2</td></tr>
+                                    <tr><td class="p-1">A.Ş.</td><td class="p-1">250k+</td><td class="p-1 text-right">x5</td></tr>
+                                    <tr><td class="p-1 text-amber-400 font-bold">Holding</td><td class="p-1 text-amber-400">1M+</td><td class="p-1 text-right text-amber-400">x10</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <h4 class="text-blue-400 font-bold border-b border-slate-700 pb-1 mt-4">3. Oyun Akışı</h4>
+                    <ol class="list-decimal pl-5 space-y-1 text-slate-400">
+                        <li>Sol üstteki <b>Senaryo</b> kartını okuyun.</li>
+                        <li>Hesabı, yönü (Borç/Alacak) ve tutarı girip <b>"Ekle"</b> butonuna basın.</li>
+                        <li><b>"KONTROL ET & KAYDET"</b> ile turu tamamlayın.</li>
+                    </ol>
+                </div>
+
+                <div id="tabContent-financials" class="hidden animate__animated animate__fadeIn">
+                    <div class="bg-blue-900/20 border border-blue-800/50 p-3 rounded-lg mb-4 text-xs text-blue-200">
+                        <i class="fa-solid fa-circle-info mr-2"></i>
+                        Zor (CFO) modunda oynuyorsanız, her ay sonunda T-Cetvellerindeki bakiyelere bakarak bu alanları manuel hesaplamanız gerekir.
                     </div>
 
-                    <div>
-                        <h4 class="text-yellow-400 font-bold border-b border-slate-700 pb-1 mb-2">2. Kariyer Basamakları</h4>
-                        <p class="mb-2">Kariyer modunda <b>Özkaynaklarınız</b> (Sermaye + Kar) arttıkça unvanınız ve kazandığınız puan katsayısı artar.</p>
-                        <table class="w-full text-xs text-left text-slate-400">
-                            <thead class="text-slate-200 bg-slate-700">
-                                <tr>
-                                    <th class="p-1">Unvan</th>
-                                    <th class="p-1">Gereken Özkaynak</th>
-                                    <th class="p-1 text-right">Çarpan</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-700 border border-slate-700">
-                                <tr><td class="p-1">Startup</td><td class="p-1">0 - 50k</td><td class="p-1 text-right">x1</td></tr>
-                                <tr><td class="p-1">KOBİ</td><td class="p-1">50k+</td><td class="p-1 text-right">x2</td></tr>
-                                <tr><td class="p-1">A.Ş.</td><td class="p-1">250k+</td><td class="p-1 text-right">x5</td></tr>
-                                <tr><td class="p-1 text-amber-400 font-bold">Holding</td><td class="p-1 text-amber-400">1M+</td><td class="p-1 text-right text-amber-400">x10</td></tr>
-                            </tbody>
-                        </table>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="text-blue-400 font-bold border-b border-slate-700 pb-1 mb-3 flex items-center">
+                                <span class="bg-blue-900/50 px-2 py-0.5 rounded text-xs mr-2">1</span> BİLANÇO
+                            </h4>
+                            <div class="space-y-3 text-xs">
+                                <div class="bg-slate-800 p-2 rounded border border-slate-700">
+                                    <strong class="text-slate-200 block mb-1">Dönen Varlıklar</strong>
+                                    <p class="text-slate-400">Kodu <b>100 ile 199</b> arasında olan tüm hesapların borç bakiyeleri toplamıdır.</p>
+                                </div>
+                                <div class="bg-slate-800 p-2 rounded border border-slate-700">
+                                    <strong class="text-slate-200 block mb-1">Duran Varlıklar</strong>
+                                    <p class="text-slate-400">Kodu <b>200 ile 299</b> arasında olan hesapların toplamıdır.</p>
+                                </div>
+                                <div class="bg-slate-800 p-2 rounded border border-slate-700">
+                                    <strong class="text-slate-200 block mb-1">Kısa Vadeli Yabancı Kaynaklar</strong>
+                                    <p class="text-slate-400">Kodu <b>300 ile 399</b> arasında olan borçların toplamıdır.</p>
+                                </div>
+                                <div class="bg-slate-800 p-2 rounded border border-slate-700">
+                                    <strong class="text-slate-200 block mb-1">Uzun Vadeli Yabancı Kaynaklar</strong>
+                                    <p class="text-slate-400">Kodu <b>400 ile 499</b> arasında olan borçların toplamıdır.</p>
+                                </div>
+                                <div class="bg-slate-800 p-2 rounded border border-slate-700">
+                                    <strong class="text-slate-200 block mb-1">Özkaynaklar</strong>
+                                    <p class="text-slate-400">Kodu <b>500 ile 599</b> arasında olan hesapların (Sermaye) toplamıdır.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 class="text-emerald-400 font-bold border-b border-slate-700 pb-1 mb-3 flex items-center">
+                                <span class="bg-emerald-900/50 px-2 py-0.5 rounded text-xs mr-2">2</span> GELİR TABLOSU
+                            </h4>
+                            <div class="space-y-3 text-xs">
+                                <div class="bg-slate-800 p-2 rounded border border-slate-700">
+                                    <strong class="text-slate-200 block mb-1">Brüt Satışlar (Gelirler)</strong>
+                                    <p class="text-slate-400">Kodu <b>600 ile 619</b> ve <b>640 ile 649</b> arasında olan gelirlerin toplamıdır.</p>
+                                </div>
+                                <div class="bg-slate-800 p-2 rounded border border-slate-700">
+                                    <strong class="text-slate-200 block mb-1">Giderler (-)</strong>
+                                    <p class="text-slate-400">700'lü hesaplar ve 600'lü gider hesaplarının (621, 657 vb.) toplamıdır.</p>
+                                </div>
+                                <div class="bg-slate-800/50 p-2 rounded border border-emerald-900/30 mt-4">
+                                    <strong class="text-emerald-400 block mb-1">NET KAR / ZARAR</strong>
+                                    <code class="block mt-1 bg-black/30 p-1 rounded text-center text-yellow-500 font-mono">Gelirler - Giderler</code>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <h4 class="text-blue-400 font-bold border-b border-slate-700 pb-1 mt-4">3. Oyun Akışı</h4>
-                <ol class="list-decimal pl-5 space-y-1 text-slate-400">
-                    <li>Sol üstteki <b>Senaryo</b> kartını dikkatlice okuyun.</li>
-                    <li>İlgili hesabı, yönü (Borç/Alacak) seçin ve tutarı girerek <b>"Satır Ekle"</b> butonuna basın.</li>
-                    <li>Tüm kalemleri girdikten sonra <b>"KONTROL ET & KAYDET"</b> butonuna basın.</li>
-                    <li>Takıldığınızda sağ üstteki <b>"Yardım Al"</b> butonunu kullanabilirsiniz (Puan kazandırmaz).</li>
-                </ol>
             </div>
+            
             <div class="p-4 bg-slate-900 border-t border-slate-700 text-right">
                 <button onclick="closeHowToPlay()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-bold transition">Anlaşıldı</button>
             </div>
@@ -312,6 +386,50 @@
             </div>
             <div class="p-4 bg-slate-900 border-t border-slate-700 text-right">
                 <button onclick="closeLeaderboard()" class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded font-bold transition">Kapat</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="depreciationModal" class="fixed inset-0 bg-slate-900/90 z-50 hidden flex items-center justify-center backdrop-blur-sm">
+        <div class="bg-slate-800 w-full max-w-lg rounded-xl border border-slate-700 shadow-2xl overflow-hidden animate__animated animate__fadeInUp">
+            <div class="p-4 bg-slate-950 border-b border-slate-700 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-orange-400"><i class="fa-solid fa-calculator mr-2"></i>Amortisman Hesaplama</h3>
+                <button onclick="closeDepreciationModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            
+            <div class="p-6 space-y-4">
+                <div class="bg-orange-900/20 p-3 rounded border border-orange-800/50 text-xs text-orange-200 mb-4">
+                    <i class="fa-solid fa-circle-info mr-2"></i>Senaryoda belirtilen değerleri girerek yıllık tutarı hesaplayın.
+                </div>
+
+                <div>
+                    <label class="block text-xs text-slate-500 mb-1">Varlık Değeri (Maliyet Bedeli)</label>
+                    <input type="number" id="depAssetValue" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white font-mono" placeholder="Örn: 50000">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs text-slate-500 mb-1">Faydalı Ömür (Yıl)</label>
+                        <input type="number" id="depLife" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white font-mono" placeholder="Örn: 5">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-500 mb-1">Yöntem</label>
+                        <select id="depMethod" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white">
+                            <option value="normal">Normal Amortisman</option>
+                            <option value="accelerated">Hızlandırılmış (Azalan Bakiyeler)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t border-slate-700">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-sm text-slate-400">Hesaplanan Gider:</span>
+                        <span id="depResultDisplay" class="text-xl font-bold text-emerald-400 font-mono">0,00 ₺</span>
+                    </div>
+                    <button onclick="calculateDepreciation()" class="w-full bg-orange-600 hover:bg-orange-500 text-white font-bold py-2 rounded transition">
+                        Hesapla
+                    </button>
+                </div>
             </div>
         </div>
     </div>
