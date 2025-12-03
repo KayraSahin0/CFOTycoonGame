@@ -160,7 +160,7 @@ function generateNewTurn() {
     
     // UI Güncelle
     document.getElementById('scenarioText').innerText = GameState.currentScenario.text;
-    document.getElementById('turnBadge').innerText = `Ay: ${GameState.turn}`;
+    document.getElementById('turnBadge').innerText = formatTurnDate(GameState.turn);
     document.getElementById('titleBadge').innerText = GameState.title;
     document.getElementById('scoreBadge').innerText = GameState.score;
     document.getElementById('companyNameDisplay').innerText = GameState.companyName;
@@ -714,7 +714,32 @@ function nextTurn() {
 }
 
 function formatMoney(amount) {
-    return new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(amount);
+    return new Intl.NumberFormat('tr-TR', { 
+        style: 'currency', 
+        currency: 'TRY',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2 
+    }).format(amount);
+}
+
+function formatTurnDate(turn) {
+    // 12. aydan sonra (yani 13. tur ve sonrası) yıl formatına geç
+    if (turn <= 12) {
+        return `Ay: ${turn}`;
+    } else {
+        const years = Math.floor(turn / 12);
+        const months = turn % 12;
+        
+        // Örn: 12. ay bitti, 13. tur => 1y 1a
+        // Eğer tam 24. tur ise (24/12 = 2, kalan 0) => 2y 0a yerine 1y 12a mı yoksa 2y mu?
+        // Senin istediğin "15. aydaysak 1y3a" mantığına göre:
+        // 15 / 12 = 1 (Yıl), kalan 3 (Ay).
+        
+        // Eğer kalan 0 ise (örn: 24. ay), bu "2. Yılın sonu" demek ama 
+        // gösterim olarak "2y 0a" yerine direkt "2. Yıl" veya "1y 12a" denebilir.
+        // Senin formatına sadık kalarak:
+        return `${years}Y ${months}A`;
+    }
 }
 
 // Global functions
