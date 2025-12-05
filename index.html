@@ -434,6 +434,17 @@
         </div>
     </div>
 
+    <div id="introVideoContainer" class="fixed inset-0 z-[100] bg-black hidden flex items-center justify-center">
+        <video id="introVideo" class="w-full h-full object-cover" playsinline>
+            <source src="./start_Vid/Muhasebe_Simülasyonu_Video_Intro.mp4" type="video/mp4">
+            Tarayıcınız video oynatmayı desteklemiyor.
+        </video>
+        
+        <button onclick="skipIntro()" class="absolute bottom-8 right-8 text-white/50 hover:text-white bg-black/50 hover:bg-black/80 px-4 py-2 rounded border border-white/20 transition backdrop-blur-sm text-sm">
+            Girişi Atla <i class="fa-solid fa-forward ml-2"></i>
+        </button>
+    </div>
+
     <script src="data.js"></script>
     <script src="app.js"></script>
 </body>

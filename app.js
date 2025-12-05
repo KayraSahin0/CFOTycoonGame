@@ -85,8 +85,9 @@ function initApp() {
         if (result.isConfirmed) {
             startCareerSetup();
         } else if (result.isDenied) {
-            startGame('sandbox', 'easy');
-        }
+        // Önce video, sonra oyun
+        playIntro(() => startGame('sandbox', 'easy'));
+    }
     });
 }
 
@@ -116,7 +117,7 @@ function startCareerSetup() {
         });
 
         GameState.companyName = companyName || 'Girişimci A.Ş.';
-        startGame('career', diff);
+        playIntro(() => startGame('career', diff));
     });
 }
 
@@ -646,6 +647,55 @@ function finishGame() {
                 location.reload();
             });
         }
+    });
+}
+
+// --- INTRO VIDEO FONKSİYONU (YENİ) ---
+function playIntro(onCompleteCallback) {
+    const container = document.getElementById('introVideoContainer');
+    const video = document.getElementById('introVideo');
+
+    if (!container || !video) {
+        // Video yoksa direkt oyunu başlat
+        if (onCompleteCallback) onCompleteCallback();
+        return;
+    }
+
+    // 1. Videoyu Göster
+    container.classList.remove('hidden');
+    
+    // 2. Videoyu Hazırla
+    video.currentTime = 0;
+    video.volume = 0.5; // Ses seviyesi %50
+    video.muted = false; // Sesli oynatmayı dene
+
+    // 3. Oynat ve Bitince Callback Çalıştır
+    const finishIntro = () => {
+        // Tekrar çalışmasını önle
+        video.onended = null;
+        video.pause();
+        
+        // Efektli kapanış
+        container.classList.add('animate__animated', 'animate__fadeOut');
+        
+        // Animasyon bitince gizle ve oyunu başlat
+        setTimeout(() => {
+            container.classList.add('hidden');
+            container.classList.remove('animate__animated', 'animate__fadeOut');
+            if (onCompleteCallback) onCompleteCallback();
+        }, 500); // 0.5sn fade out süresi
+    };
+
+    video.onended = finishIntro;
+    
+    // Skip fonksiyonunu global yap (Buton için)
+    window.skipIntro = finishIntro;
+
+    // Oynatmayı dene (Tarayıcı politikaları bazen sesi engelleyebilir)
+    video.play().catch(error => {
+        console.log("Otomatik oynatma engellendi, sessiz deneniyor:", error);
+        video.muted = true;
+        video.play();
     });
 }
 
