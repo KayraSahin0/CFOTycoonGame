@@ -16,6 +16,7 @@ const GameState = {
     achievements: [],
     currentScenario: null,
     journalEntry: [],
+    manualScenariosQueue: [], // YENİ: Manuel senaryo sırası
     helpUsed: false
 };
 
@@ -75,19 +76,26 @@ document.addEventListener('DOMContentLoaded', () => {
 function initApp() {
     Swal.fire({
         title: 'CFO Tycoon\'a Hoşgeldiniz',
-        text: 'Şirketinizin finansal kaderini belirleyin.',
+        text: 'Oyun modunu seçiniz.',
         icon: 'info',
-        confirmButtonText: 'Kariyer Modu',
         showDenyButton: true,
+        showCancelButton: true,
+        confirmButtonText: 'Kariyer Modu',
         denyButtonText: 'Serbest Mod (Sandbox)',
+        cancelButtonText: 'Manuel Mod (Senaryo Yaz)', // YENİ BUTON
+        confirmButtonColor: '#059669', // Emerald
+        denyButtonColor: '#d97706',    // Amber
+        cancelButtonColor: '#3b82f6',  // Blue
         allowOutsideClick: false
     }).then((result) => {
         if (result.isConfirmed) {
             startCareerSetup();
         } else if (result.isDenied) {
-        // Önce video, sonra oyun
-        playIntro(() => startGame('sandbox', 'easy'));
-    }
+            playIntro(() => startGame('sandbox', 'easy'));
+        } else if (result.dismiss === Swal.DismissReason.cancel) {
+            // Manuel Mod Seçildi
+            openManualInput();
+        }
     });
 }
 
@@ -172,6 +180,29 @@ function generateNewTurn() {
 
     // --- ZORUNLU BAŞLANGIÇ SENARYOSU (Turn 1 & Career) ---
     if (GameState.turn === 1 && GameState.mode === 'career') {
+        GameState.currentScenario = ScenarioEngine.startupScenario;
+    } else {
+        GameState.currentScenario = ScenarioEngine.generate(GameState.turn, GameState.multiplier, GameState.title, GameState.accounts);
+    }
+
+    // --- SENARYO SEÇİMİ ---
+    if (GameState.mode === 'manual') {
+        // Manuel modda sıradaki senaryoyu al
+        if (GameState.manualScenariosQueue.length > 0) {
+            // İlk elemanı al ve listeden çıkar (shift)
+            GameState.currentScenario = GameState.manualScenariosQueue.shift();
+        } else {
+            // Senaryolar bitti
+            Swal.fire({
+                title: 'Tebrikler!',
+                text: 'Yazdığınız tüm senaryoları başarıyla tamamladınız.',
+                icon: 'success',
+                confirmButtonText: 'Ana Menüye Dön'
+            }).then(() => location.reload());
+            return;
+        }
+    } 
+    else if (GameState.turn === 1 && GameState.mode === 'career') {
         GameState.currentScenario = ScenarioEngine.startupScenario;
     } else {
         GameState.currentScenario = ScenarioEngine.generate(GameState.turn, GameState.multiplier, GameState.title, GameState.accounts);
@@ -698,6 +729,140 @@ function playIntro(onCompleteCallback) {
         video.play();
     });
 }
+
+// --- MANUEL MOD VE METİN ANALİZİ ---
+
+function openManualInput() {
+    document.getElementById('manualInputModal').classList.remove('hidden');
+}
+
+function closeManualInput() {
+    document.getElementById('manualInputModal').classList.add('hidden');
+}
+
+function processManualScenarios() {
+    const text = document.getElementById('manualScenarioText').value;
+    if (!text.trim()) {
+        Swal.fire('Hata', 'Lütfen en az bir senaryo yazınız.', 'error');
+        return;
+    }
+
+    // Yükleniyor efekti
+    Swal.fire({
+        title: 'Senaryolar Analiz Ediliyor...',
+        html: 'Yapay zeka motoru metni işliyor.',
+        timer: 1500,
+        timerProgressBar: true,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    }).then(() => {
+        // Analiz Başlat
+        const scenarios = parseUserText(text);
+        
+        if (scenarios.length === 0) {
+            Swal.fire('Hata', 'Geçerli bir senaryo tespit edilemedi. Lütfen tutar ve anahtar kelime (sermaye, mal, satış vb.) kullandığınızdan emin olun.', 'error');
+            return;
+        }
+
+        GameState.manualScenariosQueue = scenarios;
+        closeManualInput();
+        
+        // Oyunu Başlat
+        playIntro(() => startGame('manual', 'hard')); // Manuel mod genelde zordur
+    });
+}
+
+// BASİT NLP (DOĞAL DİL İŞLEME) MOTORU
+function parseUserText(text) {
+    const lines = text.split(/\n|\r\n/).filter(line => line.trim().length > 5);
+    const parsedScenarios = [];
+
+    lines.forEach((line, index) => {
+        // 1. Tutarı Bul (Sayıları ayıkla, noktaları temizle)
+        // Regex: Sayısal değerleri bulur (örn: 500.000, 1000 vb.)
+        const numbers = line.match(/(\d{1,3}(\.\d{3})*|\d+)/g);
+        let amount = 0;
+        if (numbers) {
+            // En büyük sayıyı ana tutar olarak al (Genelde doğrudur)
+            // Noktaları silip sayıya çevir
+            amount = parseFloat(numbers[0].replace(/\./g, ''));
+        }
+
+        if (amount === 0) return; // Tutar yoksa geç
+
+        const l = line.toLowerCase();
+        let entries = [];
+
+        // 2. Anahtar Kelime Analizi ve Muhasebe Eşleşmesi
+        
+        // --- KURULUŞ & SERMAYE ---
+        if (l.includes('sermaye') || l.includes('kurdu') || l.includes('başla')) {
+            entries.push({ code: '500', type: 'credit', amount: amount });
+            // Karşı bacak: Nakit mi Banka mı?
+            if (l.includes('banka')) entries.push({ code: '102', type: 'debit', amount: amount });
+            else entries.push({ code: '100', type: 'debit', amount: amount }); // Varsayılan Kasa
+        }
+        
+        // --- MAL ALIŞI ---
+        else if (l.includes('mal') && (l.includes('al') || l.includes('giriş'))) {
+            entries.push({ code: '153', type: 'debit', amount: amount });
+            entries.push({ code: '191', type: 'debit', amount: amount * 0.2 }); // %20 KDV varsayımı
+            const total = amount * 1.2;
+            
+            if (l.includes('veresiye') || l.includes('borç')) entries.push({ code: '320', type: 'credit', amount: total });
+            else if (l.includes('banka') || l.includes('havale')) entries.push({ code: '102', type: 'credit', amount: total });
+            else entries.push({ code: '100', type: 'credit', amount: total });
+        }
+
+        // --- SATIŞ ---
+        else if (l.includes('satış') || l.includes('sattı')) {
+            entries.push({ code: '600', type: 'credit', amount: amount });
+            entries.push({ code: '391', type: 'credit', amount: amount * 0.2 });
+            const total = amount * 1.2;
+
+            if (l.includes('veresiye')) entries.push({ code: '120', type: 'debit', amount: total });
+            else if (l.includes('kredi kart')) entries.push({ code: '102', type: 'debit', amount: total }); // Kredi kartı genelde bankaya geçer
+            else if (l.includes('banka')) entries.push({ code: '102', type: 'debit', amount: total });
+            else entries.push({ code: '100', type: 'debit', amount: total });
+        }
+
+        // --- BANKAYA YATIRMA / ÇEKME ---
+        else if (l.includes('banka') && l.includes('yatır')) {
+            entries.push({ code: '102', type: 'debit', amount: amount });
+            entries.push({ code: '100', type: 'credit', amount: amount });
+        }
+        else if (l.includes('banka') && l.includes('çek')) {
+            entries.push({ code: '100', type: 'debit', amount: amount });
+            entries.push({ code: '102', type: 'credit', amount: amount });
+        }
+
+        // --- GİDER (Kira, Elektrik vb.) ---
+        else if (l.includes('gider') || l.includes('kira') || l.includes('fatura') || l.includes('öde')) {
+            entries.push({ code: '770', type: 'debit', amount: amount });
+            // KDV ihtimali? Basitlik için KDV'siz veya KDV dahil varsayalım,
+            // ama genelde gider + KDV olur. Şimdilik düz mantık:
+            if(l.includes('banka')) entries.push({ code: '102', type: 'credit', amount: amount });
+            else entries.push({ code: '100', type: 'credit', amount: amount });
+        }
+
+        // Eğer geçerli bir kayıt oluştuysa listeye ekle
+        if (entries.length > 0) {
+            parsedScenarios.push({
+                id: `manual_${index}`,
+                text: line.trim(), // Kullanıcının yazdığı metni olduğu gibi göster
+                correctEntries: entries
+            });
+        }
+    });
+
+    return parsedScenarios;
+}
+
+// Global'e ekle
+window.openManualInput = openManualInput;
+window.closeManualInput = closeManualInput;
+window.processManualScenarios = processManualScenarios;
 
 // Global'e ekle
 window.finishGame = finishGame;
