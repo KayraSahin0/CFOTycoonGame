@@ -53,6 +53,7 @@ const INITIAL_ACCOUNTS = [
     { code: '121', name: 'Alacak Senetleri', type: 'A', group: 'assets_current', balance: 0, dr: 0, cr: 0 },
     { code: '153', name: 'Ticari Mallar', type: 'A', group: 'assets_current', balance: 0, dr: 0, cr: 0 },
     { code: '159', name: 'Verilen Sipariş Avansları', type: 'A', group: 'assets_current', balance: 0, dr: 0, cr: 0 }, 
+    { code: '180', name: 'Gelecek Aylara Ait Giderler', type: 'A', group: 'assets_current', balance: 0, dr: 0, cr: 0 },
     { code: '190', name: 'Devreden KDV', type: 'A', group: 'assets_current', balance: 0, dr: 0, cr: 0 },
     { code: '191', name: 'İndirilecek KDV', type: 'A', group: 'assets_current', balance: 0, dr: 0, cr: 0 },
     { code: '195', name: 'İş Avansları', type: 'A', group: 'assets_current', balance: 0, dr: 0, cr: 0 },
@@ -84,6 +85,7 @@ const INITIAL_ACCOUNTS = [
     { code: '600', name: 'Yurt İçi Satışlar', type: 'I', group: 'income', balance: 0, dr: 0, cr: 0 },
     { code: '602', name: 'Diğer Gelirler', type: 'I', group: 'income', balance: 0, dr: 0, cr: 0 },
     { code: '621', name: 'Satılan Malın Maliyeti (-)', type: 'X', group: 'expense', balance: 0, dr: 0, cr: 0 },
+    { code: '631', name: 'Pazarlama Satış ve Dağ. Gider (-)', type: 'X', group: 'expense', balance: 0, dr: 0, cr: 0 },
     { code: '642', name: 'Faiz Gelirleri', type: 'I', group: 'income', balance: 0, dr: 0, cr: 0 },
     { code: '657', name: 'Reeskont Faiz Giderleri (-)', type: 'X', group: 'expense', balance: 0, dr: 0, cr: 0 },
 
@@ -135,7 +137,7 @@ const ScenarioEngine = {
         // --- SATIŞ & GELİR ---
         {
             id: 'sale_cash',
-            text: (amt) => `Müşteriye ${formatDataMoney(amt)} TL + KDV (%20) tutarında mal satıldı. Bedeli PEŞİN (Nakit) tahsil edildi. (Maliyet: ${formatDataMoney(Math.round(amt*0.6))})`,
+            text: (amt) => `Müşteriye ${formatDataMoney(amt)} TL tutarında mal satıldı. Ayrıca %20 KDV (${formatDataMoney(amt*0.2)}) hesaplandı. Toplam tutar PEŞİN (Nakit) tahsil edildi. (Maliyet: ${formatDataMoney(Math.round(amt*0.6))})`,
             logic: (amt) => [
                 { code: '100', type: 'debit', amount: amt * 1.2 }, 
                 { code: '600', type: 'credit', amount: amt }, 
@@ -146,7 +148,7 @@ const ScenarioEngine = {
         },
         {
             id: 'sale_credit_card',
-            text: (amt) => `Müşterilere kredi kartı ile (POS) ${formatDataMoney(amt)} TL + %20 KDV tutarında mal satıldı. (Banka hesabına geçtiğini varsayalım). Maliyet ihmal.`,
+            text: (amt) => `Müşterilere kredi kartı ile (POS) ${formatDataMoney(amt)} TL mal satışı yapıldı. %20 KDV (${formatDataMoney(amt*0.2)}) dahil toplam tutar banka hesabına geçti. (Maliyet ihmal)`,
             logic: (amt) => [
                 { code: '102', type: 'debit', amount: amt * 1.2 },
                 { code: '600', type: 'credit', amount: amt },
@@ -155,7 +157,7 @@ const ScenarioEngine = {
         },
         {
             id: 'service_revenue',
-            text: (amt) => `Danışmanlık hizmeti verildi ve ${formatDataMoney(amt)} TL + %20 KDV tutarında fatura kesildi. Bedeli PEŞİN (Kasa) tahsil edildi.`,
+            text: (amt) => `Danışmanlık hizmeti verildi ve ${formatDataMoney(amt)} TL + %20 KDV tutarında fatura kesildi. Toplam bedel PEŞİN (Kasa) tahsil edildi.`,
             logic: (amt) => [
                 { code: '100', type: 'debit', amount: amt * 1.2 },
                 { code: '600', type: 'credit', amount: amt },
@@ -182,9 +184,9 @@ const ScenarioEngine = {
         },
         {
             id: 'vehicle_fuel',
-            text: (amt) => `Şirket araçları için ${formatDataMoney(amt)} TL + %20 KDV tutarında yakıt alındı. Ödeme şirket kredi kartı ile (Banka Kredisi) yapıldı.`,
+            text: (amt) => `Şirket araçları için ${formatDataMoney(amt)} TL yakıt alındı. %20 KDV (${formatDataMoney(amt*0.2)}) ile birlikte toplam ödeme şirket kredi kartı (Banka Kredisi) ile yapıldı.`,
             logic: (amt) => [
-                { code: '760', type: 'debit', amount: amt }, 
+                { code: '631', type: 'debit', amount: amt }, 
                 { code: '191', type: 'debit', amount: amt * 0.2 },
                 { code: '300', type: 'credit', amount: amt * 1.2 }
             ]
@@ -200,11 +202,20 @@ const ScenarioEngine = {
         },
         {
             id: 'purchase_credit', 
-            text: (amt) => `Satıcıdan ${formatDataMoney(amt)} TL + KDV (%20) tutarında ticari mal alındı. Ödeme VADELİ (Veresiye).`,
+            text: (amt) => `Satıcıdan ${formatDataMoney(amt)} TL tutarında ticari mal alındı. %20 KDV hariçtir. Toplam tutar (Mal + KDV) VADELİ (Veresiye) olarak borçlanıldı.`,
             logic: (amt) => [
                 { code: '153', type: 'debit', amount: amt },
                 { code: '191', type: 'debit', amount: amt * 0.2 },
                 { code: '320', type: 'credit', amount: amt * 1.2 }
+            ]
+        },
+
+        {
+            id: 'prepaid_expense',
+            text: (amt) => `Gelecek 3 ayı kapsayan ofis kirası olarak toplam ${formatDataMoney(amt)} TL peşin ödendi. (Gelecek Aylara Ait Giderler hesabını kullanın). KDV ihmal.`,
+            logic: (amt) => [
+                { code: '180', type: 'debit', amount: amt },
+                { code: '100', type: 'credit', amount: amount }
             ]
         },
 

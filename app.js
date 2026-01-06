@@ -44,6 +44,14 @@ const Leaderboard = {
     }
 };
 
+// HESAP ARAMA MANTIĞI
+const accountSearch = document.getElementById('accountSearch');
+const accountSelect = document.getElementById('accountSelect');
+    
+// Tüm hesapları yedekle (Filtreleme için)
+let allAccountsOptions = [];
+
+
 // --- INIT ---
 document.addEventListener('DOMContentLoaded', () => {
     // SweetAlert2 Dark Theme ayarı
@@ -162,7 +170,35 @@ function startGame(mode, difficulty) {
         option.text = `${acc.code} - ${acc.name}`;
         accountSelect.appendChild(option);
     });
+
+    populateAccountOptions();
+
+    accountSearch.addEventListener('input', (e) => {
+        const term = e.target.value.toLowerCase();
+        const options = accountSelect.options;
+        
+        // Mevcut seçenekleri temizle
+        accountSelect.innerHTML = '<option value="">Hesap Seçin...</option>';
+        
+        // Filtrelenmişleri ekle
+        GameState.accounts.forEach(acc => {
+            const text = `${acc.code} - ${acc.name}`.toLowerCase();
+            if (text.includes(term)) {
+                const option = document.createElement('option');
+                option.value = acc.code;
+                option.text = `${acc.code} - ${acc.name}`;
+                accountSelect.appendChild(option);
+            }
+        });
+        
+        // Eğer tek sonuç varsa otomatik seç
+        if (accountSelect.options.length === 2) {
+             accountSelect.selectedIndex = 1;
+        }
+    });
 }
+
+
 
 // --- GAME LOOP & LOGIC ---
 
@@ -502,25 +538,49 @@ function saveTransaction() {
         // GÜNCELLEME: Turn bilgisini de gönderiyoruz
         Leaderboard.save(GameState.companyName, GameState.score, GameState.turn);
 
+        if (GameState.mode === 'career') {
+            Leaderboard.save(GameState.companyName, GameState.score, GameState.turn);
+        }
+
         Swal.fire('İFLAS!', 'Nakit akışını yönetemediniz. Şirket battı.', 'error').then(() => location.reload());
         return;
     }
 
     updateUI();
 
+    // Zor modda, işlem yapıldıktan sonra T-Cetvelleri GİZLİ modda render edilmeli
+    if (GameState.difficulty === 'hard') {
+        renderLedger(false); // false = Gizli Mod
+    } else {
+        renderLedger(false); // Kolay modda parametre önemsiz, normal gösterir
+    }
+
+    // Zor Modda "Raporları Doğrula" denildiğinde T-Cetvelleri inputa dönüşmeli
     if (GameState.difficulty === 'hard') {
         if(GameState.helpUsed) {
-             Swal.fire('Bilgi', 'Yardım kullandığınız için raporlar otomatik oluşturuldu.', 'info');
+             // Yardım kullanıldıysa otomatik geç
+             renderReports(false);
+             renderLedger(false); // Normal gösterime dönülebilir yardım alındıysa
              document.getElementById('validateReportsBtn').classList.add('hidden');
              document.getElementById('nextTurnBtn').classList.remove('hidden');
-             renderReports(false);
         } else {
-             if (!GameState.helpUsed) Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Defterler işlendi. Raporları doğrulayın.', showConfirmButton: false, timer: 3000 });
+            // Manuel doğrulama bekleniyor
             document.getElementById('validateReportsBtn').classList.remove('hidden');
             document.getElementById('nextTurnBtn').classList.add('hidden');
+            
+            // Raporları Input modunda göster
             renderReports(true); 
+
+            // Mevcut butonu modifiye edelim:
+            const valBtn = document.getElementById('validateReportsBtn');
+            valBtn.onclick = function() {
+                renderLedger(true); // T-Cetvellerini Input Yap
+                validateHardMode(); // Mevcut değerleri kontrol et (ilk basışta hepsi boşsa hata verir, doğrusu bu)
+            };
+            valBtn.innerText = "Değerleri Kontrol Et";
         }
     } else {
+        // Kolay Mod
         document.getElementById('validateReportsBtn').classList.add('hidden');
         document.getElementById('nextTurnBtn').classList.remove('hidden');
         renderReports(false);
@@ -572,39 +632,112 @@ function renderReports(isInputMode) {
 }
 
 function validateHardMode() {
-    const inputs = document.querySelectorAll('.hard-mode-input');
-    let allCorrect = true;
-    inputs.forEach(input => {
-        const userVal = parseFloat(input.value); const targetVal = parseFloat(input.getAttribute('data-target'));
+    // 1. Mali Tablo Inputlarını Kontrol Et
+    const reportInputs = document.querySelectorAll('.hard-mode-input'); // Mali Tablolardaki inputlar
+    let reportsCorrect = true;
+
+    reportInputs.forEach(input => {
+        const userVal = parseFloat(input.value);
+        const targetVal = parseFloat(input.getAttribute('data-target'));
         const tolerance = Math.abs(targetVal * 0.01) + 1; 
-        if (!isNaN(userVal) && Math.abs(userVal - targetVal) <= tolerance) { input.classList.remove('error'); input.classList.add('success'); input.disabled = true; } 
-        else { input.classList.add('error'); allCorrect = false; }
+        
+        if (!isNaN(userVal) && Math.abs(userVal - targetVal) <= tolerance) {
+            input.classList.remove('error'); input.classList.add('success'); input.disabled = true; 
+        } else {
+            input.classList.add('error'); reportsCorrect = false;
+        }
     });
-    if (allCorrect) {
-        Swal.fire('Tebrikler CFO!', 'Mali tablolar doğrulandı. Bir sonraki aya geçiliyor.', 'success');
+
+    // 2. T-Cetveli Inputlarını Kontrol Et (YENİ)
+    const ledgerInputs = document.querySelectorAll('.ledger-input');
+    let ledgersCorrect = true;
+
+    if (ledgerInputs.length > 0) {
+        ledgerInputs.forEach(input => {
+            const code = input.getAttribute('data-code');
+            const acc = GameState.accounts.find(a => a.code === code);
+            const userVal = parseFloat(input.value);
+            const targetVal = acc.balance; // Hedef bakiye
+            
+            // Toleranslı kontrol (Kuruş farkları için)
+            if (!isNaN(userVal) && Math.abs(userVal - targetVal) <= 1) {
+                input.classList.remove('border-red-500', 'text-red-500');
+                input.classList.add('border-emerald-500', 'text-emerald-500', 'font-bold');
+                input.disabled = true;
+            } else {
+                input.classList.add('border-red-500', 'text-red-500');
+                ledgersCorrect = false;
+            }
+        });
+    }
+
+    if (reportsCorrect && ledgersCorrect) {
+        Swal.fire('Tebrikler CFO!', 'Büyük Defter ve Mali Tablolar doğrulandı.', 'success');
         document.getElementById('validateReportsBtn').classList.add('hidden');
         document.getElementById('nextTurnBtn').classList.remove('hidden');
-    } else { Swal.fire('Hata', 'Hesaplamalarda yanlışlık var.', 'error'); }
+    } else {
+        Swal.fire('Hata', 'Hesaplamalarda (Tablolar veya T-Cetvelleri) yanlışlık var.', 'error');
+    }
 }
 
 // --- HELPERS ---
 function updateUI() { renderLedger(); }
 
-function renderLedger() {
+function renderLedger(isInputMode = false) { // isInputMode parametresi eklendi
     const container = document.getElementById('ledgerContainer');
     container.innerHTML = '';
+
     const activeAccounts = GameState.accounts.filter(a => a.dr > 0 || a.cr > 0 || a.balance !== 0);
-    if(activeAccounts.length === 0) { container.innerHTML = '<div class="text-slate-500 text-center w-full mt-10 italic">Henüz kayıt yok.</div>'; return; }
+
+    if(activeAccounts.length === 0) {
+        container.innerHTML = '<div class="text-slate-500 text-center w-full mt-10 italic">Henüz kayıt yok.</div>';
+        return;
+    }
 
     activeAccounts.forEach(acc => {
         const div = document.createElement('div');
         div.className = "t-account-card masonry-item animate__animated animate__fadeIn";
-        const balanceColor = acc.balance < 0 ? 'text-red-400' : 'text-emerald-400';
+        
+        let footerContent = '';
+        
+        // ZOR MOD MANTIĞI:
+        if (GameState.difficulty === 'hard') {
+            if (isInputMode) {
+                // Doğrulama zamanı: Input göster
+                footerContent = `
+                    <div class="flex justify-between items-center w-full">
+                        <span class="text-xs mr-1">Bakiye:</span>
+                        <input type="number" class="ledger-input bg-slate-900 border border-slate-600 rounded w-24 text-right text-sm px-1 outline-none focus:border-blue-500" 
+                               data-code="${acc.code}" placeholder="?">
+                    </div>
+                `;
+            } else {
+                // Ay ortası: Gizli Bakiye
+                footerContent = `
+                    <div class="flex justify-between items-center w-full text-slate-500">
+                        <span>Bakiye:</span>
+                        <span><i class="fa-solid fa-lock"></i> Gizli</span>
+                    </div>
+                `;
+            }
+        } else {
+            // Kolay Mod: Normal Gösterim
+            const balanceColor = acc.balance < 0 ? 'text-red-400' : 'text-emerald-400';
+            footerContent = `<span>Bakiye:</span><span>${formatMoney(acc.balance)}</span>`;
+        }
+
         div.innerHTML = `
-            <div class="t-account"><div class="t-header">${acc.code} - ${acc.name}</div>
-                <div class="t-body"><div class="t-debit">${acc.dr > 0 ? formatMoney(acc.dr) : '-'}</div><div class="t-credit">${acc.cr > 0 ? formatMoney(acc.cr) : '-'}</div></div>
-                <div class="t-footer ${balanceColor}"><span>Bakiye:</span><span>${formatMoney(acc.balance)}</span></div>
-            </div>`;
+            <div class="t-account">
+                <div class="t-header">${acc.code} - ${acc.name}</div>
+                <div class="t-body">
+                    <div class="t-debit">${acc.dr > 0 ? formatMoney(acc.dr) : '-'}</div>
+                    <div class="t-credit">${acc.cr > 0 ? formatMoney(acc.cr) : '-'}</div>
+                </div>
+                <div class="t-footer ${GameState.difficulty === 'hard' && !isInputMode ? '' : (acc.balance < 0 ? 'text-red-400' : 'text-emerald-400')}">
+                    ${footerContent}
+                </div>
+            </div>
+        `;
         container.appendChild(div);
     });
 }
@@ -662,6 +795,11 @@ function finishGame() {
         cancelButtonText: 'İptal'
     }).then((result) => {
         if (result.isConfirmed) {
+            
+            if (GameState.mode === 'career') {
+                Leaderboard.save(GameState.companyName, GameState.score, GameState.turn);
+            }
+
             // Skoru Kaydet
             Leaderboard.save(GameState.companyName, GameState.score, GameState.turn);
             
